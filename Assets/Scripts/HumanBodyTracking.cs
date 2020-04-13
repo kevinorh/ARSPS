@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -22,10 +23,17 @@ public class HumanBodyTracking : MonoBehaviour
     [SerializeField]
     private float skeletonOffsetZ = 0;
 
+    [SerializeField]
+    private Slider curveTimeSlider;
+    [SerializeField]
+    private Slider minVertexDistanceSliderSlider;
+
 
     [SerializeField] private ARHumanBodyManager humanBodyManager;
 
     private Dictionary<TrackableId, HumanBoneController> skeletonTracker = new Dictionary<TrackableId, HumanBoneController>();
+
+    private TrailRenderer trailRenderer;
 
     public ARHumanBodyManager HumanBodyManagers
     {
@@ -38,7 +46,11 @@ public class HumanBodyTracking : MonoBehaviour
         get { return skeletonPrefab; }
         set { skeletonPrefab = value; }
     }
-
+    private void Awake()
+    {
+        curveTimeSlider.onValueChanged.AddListener(OnCurveTimeSlidersChanged);
+        minVertexDistanceSliderSlider.onValueChanged.AddListener(OnMinVertexDistnaceSlidersChanged);
+    }
     void OnEnable()
     {
         Debug.Assert(humanBodyManager != null, "Human body manager is required.");
@@ -50,6 +62,34 @@ public class HumanBodyTracking : MonoBehaviour
         if (humanBodyManager != null)
             humanBodyManager.humanBodiesChanged -= OnHumanBodiesChanged;
     }
+    void OnCurveTimeSlidersChanged(float value)
+    {
+        if (trailRenderer != null)
+        {
+            trailRenderer.time = curveTimeSlider.value;
+        }
+    }
+    void OnMinVertexDistnaceSlidersChanged(float value)
+    {
+        if (trailRenderer != null)
+        {
+            trailRenderer.minVertexDistance = minVertexDistanceSliderSlider.value;
+        }
+    }
+    void ApplyChangesToCurve(HumanBoneController humanBoneController)
+    {
+        if(curveTimeSlider!=null && minVertexDistanceSliderSlider != null)
+        {
+            trailRenderer = humanBoneController.GetComponentInChildren<TrailRenderer>();
+            trailRenderer.minVertexDistance = minVertexDistanceSliderSlider.value;
+            trailRenderer.time = curveTimeSlider.value;
+        }
+        else
+        {
+            Debug.LogError("Curve Time Slider and Min Vertex Distance Slider need to be set");
+        }
+    }
+
     void OnHumanBodiesChanged(ARHumanBodiesChangedEventArgs eventArgs)
     {
         HumanBoneController humanBoneController;
@@ -60,6 +100,9 @@ public class HumanBodyTracking : MonoBehaviour
             {
                 Debug.Log($"Adding a new skeleton [{humanBody.trackableId}].");
                 var newSkeletonGO = Instantiate(skeletonPrefab, humanBody.transform);
+
+                //apply trall render options
+                ApplyChangesToCurve(humanBoneController);
 
                 humanBoneController = newSkeletonGO.GetComponent<HumanBoneController>();
 
@@ -86,6 +129,8 @@ public class HumanBodyTracking : MonoBehaviour
             {
                 humanBoneController.ApplyBodyPose(humanBody, Vector3.zero);
             }
+            //apply trall render options
+            ApplyChangesToCurve(humanBoneController);
 
             HumanBodyTrackerUI.Instance.humanBodyText.text = $"{this.gameObject.name} {humanBody.name} Position: {humanBody.transform.position}\n" +
             $"LocalPosition: {humanBody.transform.localPosition}";
