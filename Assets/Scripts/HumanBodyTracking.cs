@@ -10,6 +10,9 @@ public class HumanBodyTracking : MonoBehaviour
 {
 
     [SerializeField]
+    private Text positionText;
+
+    [SerializeField]
     private GameObject skeletonPrefab;
 
     [SerializeField]
@@ -41,10 +44,21 @@ public class HumanBodyTracking : MonoBehaviour
     private Dictionary<TrackableId, HumanBoneController> skeletonTracker = new Dictionary<TrackableId, HumanBoneController>();
 
     private JointTracker[] jointTrackers;
+    private TrailRenderer[] trailRendersTracked;
 
     private PoseController poseController = new PoseController();
 
-    private double TimeCounter = 0; 
+    private double TimeCounter = 0;
+    private double TimeMax = 0.5;
+
+    //last jointTrackers positions
+    Vector3 lastLeftHandPosition;
+    Vector3 lastRightHandPosition;
+
+
+    //new jointTrackers positions
+    Vector3 newLeftHandPosition;
+    Vector3 newRightHandPosition;
 
     public ARHumanBodyManager HumanBodyManagers
     {
@@ -74,9 +88,7 @@ public class HumanBodyTracking : MonoBehaviour
     {
         //To get time of execution
         DateTime start = DateTime.Now;
-
-        SpeedRigth.text = string.Empty;
-        SpeedLeft.text = string.Empty;
+        positionText.text = string.Empty;
 
         HumanBoneController humanBoneController;
 
@@ -90,14 +102,16 @@ public class HumanBodyTracking : MonoBehaviour
                 if (jointTrackers == null)
                 {
                     jointTrackers = newSkeletonGO.GetComponentsInChildren<JointTracker>();
-                    foreach(JointTracker jointTracker in jointTrackers)
-                    {
-                        SpeedLeft.text += $" Bone: {jointTracker.gameObject.transform.parent.name} Position: {jointTracker.gameObject.transform.position} \n";
-                        //SpeedLeft.text += $" Bone: {jointTracker.gameObject.transform.parent.name} Local Position: {jointTracker.gameObject.transform.localPosition} \n";
-                        //calculate speed
-                        
-                        //SpeedRigth.text += $" Bone: {jointTracker.gameObject.transform.parent.name} Local Position: {jointTracker.gameObject.transform.localPosition} \n";
-                    }
+
+                    lastLeftHandPosition = new Vector3(0, 0, 0);
+                    lastRightHandPosition = new Vector3(0, 0, 0);
+                    newLeftHandPosition = new Vector3(0, 0, 0);
+                    newRightHandPosition = new Vector3(0, 0, 0);
+                }
+                if(trailRendersTracked == null)
+                {
+                    trailRendersTracked = newSkeletonGO.GetComponentsInChildren<TrailRenderer>();
+                    UnityEngine.Debug.Log($"Adding cubes tracked [{trailRendersTracked.Count()}].");
                 }
 
                 humanBoneController = newSkeletonGO.GetComponent<HumanBoneController>();
@@ -121,56 +135,36 @@ public class HumanBodyTracking : MonoBehaviour
             }
             if (jointTrackers != null)
             {
-                //get last jointTrackers positions
-                Vector3 lastLeftHandPosition = new Vector3(0, 0, 0);
-                Vector3 lastRightHandPosition = new Vector3(0, 0, 0);
-
-                foreach (JointTracker jointTracker in jointTrackers)
-                {
-                    if (jointTracker.gameObject.transform.parent.name.Equals("LeftHand"))
-                        lastLeftHandPosition = jointTracker.gameObject.transform.position;
-
-                    if (jointTracker.gameObject.transform.parent.name.Equals("RightHand"))
-                        lastRightHandPosition = jointTracker.gameObject.transform.position;
-                }
-                //get new jointTrackers positions
-                Vector3 newLeftHandPosition = new Vector3(0, 0, 0);
-                Vector3 newRightHandPosition = new Vector3(0, 0, 0);
-
                 jointTrackers = humanBoneController.GetComponentsInChildren<JointTracker>();
                 foreach (JointTracker jointTracker in jointTrackers)
                 {
-                    SpeedLeft.text += $" Bone: {jointTracker.gameObject.transform.parent.name} Position: {jointTracker.gameObject.transform.position} \n";
-                    //SpeedLeft.text += $" Bone: {jointTracker.gameObject.transform.parent.name} Local Position: {jointTracker.gameObject.transform.localPosition} \n";
-
-                    if (jointTracker.gameObject.transform.parent.name.Equals("LeftHand"))
+                    //Update new position every (TimeMax - 0.1)
+                    if (TimeCounter > TimeMax-0.1)
                     {
-                        newLeftHandPosition = jointTracker.gameObject.transform.position;
-                        //The world space position of the transform
-                        /*
-                        newLeftHandPosition = jointTracker.gameObject.transform.position;
-                        SpeedLeft.text += $"X: {newLeftHandPosition.x}\n";
-                        SpeedLeft.text += $"Y: {newLeftHandPosition.y}\n";
-                        SpeedLeft.text += $"Z: {newLeftHandPosition.z}\n";
-                        //SpeedLeft.text += $"Velocidad(I): {getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition)}";*/
-                    }
+                        if (jointTracker.gameObject.transform.parent.name.Equals("LeftHand"))
+                        {
+                            lastLeftHandPosition = newLeftHandPosition;
+                            newLeftHandPosition = jointTracker.gameObject.transform.position;
+                        }
 
-                    if (jointTracker.gameObject.transform.parent.name.Equals("RightHand"))
-                    {
-                        newRightHandPosition = jointTracker.gameObject.transform.position;
-                        /*SpeedRigth.text += $"X: {newRightHandPosition.x}\n";
-                        SpeedRigth.text += $"Y: {newRightHandPosition.y}\n";
-                        SpeedRigth.text += $"Z: {newRightHandPosition.z}\n";
-                        //SpeedRigth.text += $"Velocidad(D): {getJointMovementSpeed(lastRightHandPosition, newRightHandPosition)}";*/
+                        if (jointTracker.gameObject.transform.parent.name.Equals("RightHand"))
+                        {
+                            lastRightHandPosition = newRightHandPosition;
+                            newRightHandPosition = jointTracker.gameObject.transform.position;
+                        }
                     }
-                        
                 }
+                if (poseController.ResumePosition(jointTrackers))
+                    positionText.text += $"REANUDAR";
 
-                SpeedRigth.text += $"Resumen: {poseController.ResumePosition(jointTrackers)}\n";
-                SpeedRigth.text += $"Pausa: {poseController.PausePosition(jointTrackers)}\n";
+                if (poseController.PausePosition(jointTrackers))
+                    positionText.text += $"PAUSA";
 
-                var speed = getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition);
-                //SpeedRigth.text += $"Velocidad Izquierda: {speed}";
+                if (poseController.FinishPosition(jointTrackers))
+                    positionText.text += $"FINALIZAR";
+
+                if (poseController.RestartPosition(jointTrackers))
+                    positionText.text += $"REINICIAR";                                
             }
         }
 
@@ -187,29 +181,64 @@ public class HumanBodyTracking : MonoBehaviour
         //To get time execution
         DateTime end = DateTime.Now;
         TimeSpan ts = (end - start);
-        /*SpeedRigth.text += $"Tiempo Inicio: {start:MM/dd/yyyy hh:mm:ss.fff tt}\n";
-        SpeedRigth.text += $"Tiempo Fin: {end:MM/dd/yyyy hh:mm:ss.fff tt}\n";*/
         TimeCounter += ts.TotalSeconds*100;
 
-        if (TimeCounter > 1)
+        //Calculate speed every TimeMax
+        if (TimeCounter > TimeMax)
+        {
             TimeCounter = 0;
-        //SpeedLeft.text += $"Tiempo: {ts.TotalMilliseconds} ms\n";
-        //SpeedLeft.text += $"Tiempo Ejecutando: {TimeCounter} sec\n";
-       
+            var speedLeft = Math.Round(getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition) * 10, 3);
+            var speedRigth = Math.Round(getJointMovementSpeed(lastRightHandPosition, newRightHandPosition) * 10, 3);
+
+            SpeedLeft.text = string.Empty;
+            SpeedLeft.text += $"Posición Anterior (izquierda): ({lastLeftHandPosition.x},{lastLeftHandPosition.y},{lastLeftHandPosition.z})\n";
+            SpeedLeft.text += $"Posición Nueva (izquierda): ({newLeftHandPosition.x},{newLeftHandPosition.y},{newLeftHandPosition.z}) \n";
+            SpeedLeft.text += $"Velocidad Izquierda : {speedLeft}\n";
+
+            SpeedRigth.text = string.Empty;
+            SpeedRigth.text += $"Posición Anterior (derecha): ({lastRightHandPosition.x},{lastRightHandPosition.y},{lastRightHandPosition.z}) \n";
+            SpeedRigth.text += $"Posición Nueva (derecha): ({newRightHandPosition.x},{newRightHandPosition.y},{newRightHandPosition.z})\n";
+            SpeedRigth.text += $"Velocidad derecha : {speedRigth}\n";
+
+
+            if (trailRendersTracked != null)
+                foreach (var cube in trailRendersTracked)
+                {
+                    if(0<speedLeft && speedLeft <= 10)
+                    {
+                        cube.material.color = Color.white;
+                    }
+                    else if (10 < speedLeft && speedLeft <= 15)
+                    {
+                        cube.material.color = Color.yellow;
+                    }
+                    else if (15 < speedLeft && speedLeft <= 20)
+                    {
+                        cube.material.color = Color.red;
+                    }
+                    else if (20 < speedLeft && speedLeft <= 25)
+                    {
+                        cube.material.color = Color.blue;
+                    }
+                    else if (25 < speedLeft)
+                    {
+                        cube.material.color = Color.green;
+                    }
+                }
+        }
     }
 
     double getJointMovementSpeed(Vector3 lastPosition, Vector3 newPostion)
     {
-        //var speed = Mathf.Pow((int)(newPostion.x*10) - (int)(lastPosition.x*10), 2) + Mathf.Pow((int)(newPostion.y*10) - (int)(lastPosition.y*10), 2) + Mathf.Pow((int)(newPostion.z*10) - (int)(lastPosition.z*10), 2);
         var lastx = (float) Math.Round(lastPosition.x * 10,2);
         var lasty = (float)Math.Round(lastPosition.y * 10, 2);
         var lastz = (float)Math.Round(lastPosition.z * 10, 2);
         var newx = (float)Math.Round(newPostion.x * 10, 2); ;
         var newy = (float)Math.Round(newPostion.y * 10, 2); ;
         var newz = (float)Math.Round(newPostion.z * 10, 2); ;
-        //var distance = Math.Sqrt(Math.Pow(newx - lastx, 2)+ Math.Pow(newy - lasty, 2)+ Math.Pow(newz - lastz, 2));
-        var distance = newx - lastx;
-        //return Mathf.Sqrt(speed);
-        return distance;
+
+        double distance = Math.Sqrt(Math.Pow(newx - lastx, 2)+ Math.Pow(newy - lasty, 2)+ Math.Pow(newz - lastz, 2));
+
+        return distance/TimeMax;
     }
 }
