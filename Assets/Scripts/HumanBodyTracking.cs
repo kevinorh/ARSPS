@@ -55,10 +55,16 @@ public class HumanBodyTracking : MonoBehaviour
     Vector3 lastLeftHandPosition;
     Vector3 lastRightHandPosition;
 
+    Vector3 lastLeftToesPosition;
+    Vector3 lastRightToesPosition;
+
 
     //new jointTrackers positions
     Vector3 newLeftHandPosition;
     Vector3 newRightHandPosition;
+
+    Vector3 newLeftToesPosition;
+    Vector3 newRightToesPosition;
 
     public ARHumanBodyManager HumanBodyManagers
     {
@@ -105,13 +111,21 @@ public class HumanBodyTracking : MonoBehaviour
 
                     lastLeftHandPosition = new Vector3(0, 0, 0);
                     lastRightHandPosition = new Vector3(0, 0, 0);
+                    lastLeftToesPosition = new Vector3(0, 0, 0);
+                    lastRightToesPosition = new Vector3(0, 0, 0);
+
                     newLeftHandPosition = new Vector3(0, 0, 0);
                     newRightHandPosition = new Vector3(0, 0, 0);
+                    newLeftToesPosition = new Vector3(0, 0, 0);
+                    newRightToesPosition = new Vector3(0, 0, 0);
+
                 }
                 if(trailRendersTracked == null)
                 {
                     trailRendersTracked = newSkeletonGO.GetComponentsInChildren<TrailRenderer>();
                     UnityEngine.Debug.Log($"Adding cubes tracked [{trailRendersTracked.Count()}].");
+                    foreach(var item in trailRendersTracked)
+                        UnityEngine.Debug.Log($"Adding cubes tracked [{item.transform.parent.name}].");
                 }
 
                 humanBoneController = newSkeletonGO.GetComponent<HumanBoneController>();
@@ -152,6 +166,17 @@ public class HumanBodyTracking : MonoBehaviour
                             lastRightHandPosition = newRightHandPosition;
                             newRightHandPosition = jointTracker.gameObject.transform.position;
                         }
+                        if (jointTracker.gameObject.transform.parent.name.Equals("LeftToesEnd"))
+                        {
+                            lastLeftToesPosition = newLeftToesPosition;
+                            newLeftToesPosition = jointTracker.gameObject.transform.position;
+                        }
+
+                        if (jointTracker.gameObject.transform.parent.name.Equals("RightToesEnd"))
+                        {
+                            lastRightToesPosition = newRightToesPosition;
+                            newRightToesPosition = jointTracker.gameObject.transform.position;
+                        }
                     }
                 }
                 if (poseController.ResumePosition(jointTrackers))
@@ -187,42 +212,58 @@ public class HumanBodyTracking : MonoBehaviour
         if (TimeCounter > TimeMax)
         {
             TimeCounter = 0;
-            var speedLeft = Math.Round(getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition) * 10, 3);
-            var speedRigth = Math.Round(getJointMovementSpeed(lastRightHandPosition, newRightHandPosition) * 10, 3);
+            var speedLeftHand = Math.Round(getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition) * 10, 3);
+            var speedRigthHand = Math.Round(getJointMovementSpeed(lastRightHandPosition, newRightHandPosition) * 10, 3);
+            var speedLeftToes = Math.Round(getJointMovementSpeed(lastLeftToesPosition, newLeftToesPosition) * 10, 3);
+            var speedRightToes = Math.Round(getJointMovementSpeed(lastRightToesPosition, newRightToesPosition) * 10, 3);
 
             SpeedLeft.text = string.Empty;
-            SpeedLeft.text += $"Posición Anterior (izquierda): ({lastLeftHandPosition.x},{lastLeftHandPosition.y},{lastLeftHandPosition.z})\n";
-            SpeedLeft.text += $"Posición Nueva (izquierda): ({newLeftHandPosition.x},{newLeftHandPosition.y},{newLeftHandPosition.z}) \n";
-            SpeedLeft.text += $"Velocidad Izquierda : {speedLeft}\n";
+            SpeedLeft.text += $"Velocidad Mano Izquierda : {speedLeftHand}\n";
+
+            //SpeedLeft.text += $"Posición Anterior (pie izquierdo): ({lastLeftToesPosition.x},{lastLeftToesPosition.y},{lastLeftToesPosition.z})\n";
+            //SpeedLeft.text += $"Posición Nueva (pie izquierdo): ({newLeftToesPosition.x},{newLeftToesPosition.y},{newLeftToesPosition.z}) \n";
+
+            SpeedLeft.text += $"Velocidad Pie Izquierdo : {speedLeftToes}\n";
 
             SpeedRigth.text = string.Empty;
-            SpeedRigth.text += $"Posición Anterior (derecha): ({lastRightHandPosition.x},{lastRightHandPosition.y},{lastRightHandPosition.z}) \n";
-            SpeedRigth.text += $"Posición Nueva (derecha): ({newRightHandPosition.x},{newRightHandPosition.y},{newRightHandPosition.z})\n";
-            SpeedRigth.text += $"Velocidad derecha : {speedRigth}\n";
+            SpeedRigth.text += $"Velocidad Mano Derecha : {speedRigthHand}\n";
+
+            //SpeedRigth.text += $"Posición Anterior (pie derecho): ({lastRightToesPosition.x},{lastRightToesPosition.y},{lastRightToesPosition.z}) \n";
+            //SpeedRigth.text += $"Posición Nueva (pie derecho): ({newRightToesPosition.x},{newRightToesPosition.y},{newRightToesPosition.z})\n";
+
+            SpeedRigth.text += $"Velocidad Pie Derecho : {speedRightToes}\n";
 
 
             if (trailRendersTracked != null)
                 foreach (var cube in trailRendersTracked)
                 {
-                    if(0<speedLeft && speedLeft <= 10)
+                    double speed = 0;
+                    switch (cube.transform.parent.name)
                     {
-                        cube.material.color = Color.white;
+                        case "LeftHand": speed = speedLeftHand;break;
+                        case "RightHand": speed = speedRigthHand; break;
+                        case "LeftToesEnd": speed = speedLeftToes; break;
+                        case "RightToesEnd": speed = speedRightToes; break;
                     }
-                    else if (10 < speedLeft && speedLeft <= 15)
-                    {
-                        cube.material.color = Color.yellow;
-                    }
-                    else if (15 < speedLeft && speedLeft <= 20)
+                    if(0< speed && speed <= 5)
                     {
                         cube.material.color = Color.red;
                     }
-                    else if (20 < speedLeft && speedLeft <= 25)
+                    else if (5 < speed && speed <= 10)
+                    {
+                        cube.material.color = Color.green;
+                    }
+                    else if (10 < speed && speed <= 15)
+                    {
+                        cube.material.color = Color.yellow;
+                    }
+                    else if (15 < speed && speed <= 20)
                     {
                         cube.material.color = Color.blue;
                     }
-                    else if (25 < speedLeft)
+                    else if (20 < speed)
                     {
-                        cube.material.color = Color.green;
+                        cube.material.color = Color.magenta;
                     }
                 }
         }
