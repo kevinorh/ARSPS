@@ -1135,7 +1135,7 @@ GameObject:
   - component: {fileID: 1900227452}
   - component: {fileID: 1900227451}
   m_Layer: 0
-  m_Name: Human Body Tracking
+  m_Name: ARSound
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1160,9 +1160,9 @@ MonoBehaviour:
   skeletonOffsetY: 0
   skeletonOffsetZ: 0
   SpeedRigth: {fileID: 2125829288}
-  PositionRigth: {fileID: 886355955}
   SpeedLeft: {fileID: 1059019439}
-  PositionLeft: {fileID: 935374244}
+  audioBit1: {fileID: 8300000, guid: eec5d08f722234d51afd8fa848ac28ee, type: 3}
+  audioBit2: {fileID: 8300000, guid: e046a5657ce42460dadd5c75448e5cf2, type: 3}
   humanBodyManager: {fileID: 2004124691}
 --- !u!4 &1900227452
 Transform:

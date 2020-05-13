@@ -31,13 +31,15 @@ public class HumanBodyTracking : MonoBehaviour
     private Text SpeedRigth;
 
     [SerializeField]
-    private Text PositionRigth;
-
-    [SerializeField]
     private Text SpeedLeft;
 
     [SerializeField]
-    private Text PositionLeft;
+    public AudioClip audioBit1;
+
+    [SerializeField]
+    public AudioClip audioBit2;
+
+
 
     [SerializeField] private ARHumanBodyManager humanBodyManager;
 
@@ -179,13 +181,13 @@ public class HumanBodyTracking : MonoBehaviour
                         }
                     }
                 }
-                if (poseController.ResumePosition(jointTrackers))
+                if (poseController.ResumePosition(jointTrackers,audioBit1))
                     positionText.text += $"REANUDAR";
 
                 if (poseController.PausePosition(jointTrackers))
                     positionText.text += $"PAUSA";
 
-                if (poseController.FinishPosition(jointTrackers))
+                if (poseController.FinishPosition(jointTrackers, audioBit2))
                     positionText.text += $"FINALIZAR";
 
                 if (poseController.RestartPosition(jointTrackers))
@@ -220,16 +222,10 @@ public class HumanBodyTracking : MonoBehaviour
             SpeedLeft.text = string.Empty;
             SpeedLeft.text += $"Velocidad Mano Izquierda : {speedLeftHand}\n";
 
-            //SpeedLeft.text += $"Posición Anterior (pie izquierdo): ({lastLeftToesPosition.x},{lastLeftToesPosition.y},{lastLeftToesPosition.z})\n";
-            //SpeedLeft.text += $"Posición Nueva (pie izquierdo): ({newLeftToesPosition.x},{newLeftToesPosition.y},{newLeftToesPosition.z}) \n";
-
             SpeedLeft.text += $"Velocidad Pie Izquierdo : {speedLeftToes}\n";
 
             SpeedRigth.text = string.Empty;
             SpeedRigth.text += $"Velocidad Mano Derecha : {speedRigthHand}\n";
-
-            //SpeedRigth.text += $"Posición Anterior (pie derecho): ({lastRightToesPosition.x},{lastRightToesPosition.y},{lastRightToesPosition.z}) \n";
-            //SpeedRigth.text += $"Posición Nueva (pie derecho): ({newRightToesPosition.x},{newRightToesPosition.y},{newRightToesPosition.z})\n";
 
             SpeedRigth.text += $"Velocidad Pie Derecho : {speedRightToes}\n";
 

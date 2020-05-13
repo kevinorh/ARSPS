@@ -5,7 +5,8 @@ using UnityEngine;
 
 public class PoseController : MonoBehaviour
 {
-    public bool ResumePosition(JointTracker[] joints)
+
+    public bool ResumePosition(JointTracker[] joints, AudioClip audioClip)
     {
         JointTracker leftHandJoint = joints.Where(x => x.gameObject.transform.parent.name == "LeftHand").SingleOrDefault();
         JointTracker rigthHandJoint = joints.Where(x => x.gameObject.transform.parent.name == "RightHand").SingleOrDefault();
@@ -25,7 +26,10 @@ public class PoseController : MonoBehaviour
                 leftHandJoint.transform.position.y - rigthHandJoint.transform.position.y <= 0.1 &&
                 leftHandJoint.transform.position.y - rootJoint.transform.position.y >= 0.8 &&
                 rigthHandJoint.transform.position.y - rootJoint.transform.position.y >= 0.8)
+            {
+                SoundController.Instance.PlayMusic(audioClip,1f,1);
                 return true;
+            }
             else
                 return false;             
         }
@@ -56,7 +60,7 @@ public class PoseController : MonoBehaviour
                 return false;
         }
     }
-    public bool FinishPosition(JointTracker[] joints)
+    public bool FinishPosition(JointTracker[] joints, AudioClip audioClip)
     {
         JointTracker leftHandJoint = joints.Where(x => x.gameObject.transform.parent.name == "LeftHand").SingleOrDefault();
         JointTracker rigthHandJoint = joints.Where(x => x.gameObject.transform.parent.name == "RightHand").SingleOrDefault();
@@ -77,7 +81,11 @@ public class PoseController : MonoBehaviour
                 leftHandJoint.transform.position.y - rigthHandJoint.transform.position.y <= -0.9 &&
                 leftHandJoint.transform.position.y - rootJoint.transform.position.y <= 0.1 &&
                 rigthHandJoint.transform.position.y - rootJoint.transform.position.y >= 0.8)
+
+            {
+                SoundController.Instance.PlayMusic(audioClip,0.5f,2);
                 return true;
+            }
             else
                 return false;
         }
