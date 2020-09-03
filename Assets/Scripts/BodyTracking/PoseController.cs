@@ -27,7 +27,7 @@ public class PoseController : MonoBehaviour
                 leftHandJoint.transform.position.y - rootJoint.transform.position.y >= 0.8 &&
                 rigthHandJoint.transform.position.y - rootJoint.transform.position.y >= 0.8)
             {
-                SoundController.Instance.PlayMusic(audioClip,1f,1);
+                //SoundController.Instance.PlayMusic(audioClip,1f,1);
                 return true;
             }
             else
@@ -83,7 +83,7 @@ public class PoseController : MonoBehaviour
                 rigthHandJoint.transform.position.y - rootJoint.transform.position.y >= 0.8)
 
             {
-                SoundController.Instance.PlayMusic(audioClip,0.5f,2);
+                //SoundController.Instance.PlayMusic(audioClip,1f,1);
                 return true;
             }
             else

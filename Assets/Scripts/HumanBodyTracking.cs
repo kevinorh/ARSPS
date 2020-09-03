@@ -16,6 +16,9 @@ public class HumanBodyTracking : MonoBehaviour
     private GameObject skeletonPrefab;
 
     [SerializeField]
+    private GameObject esfera;
+
+    [SerializeField]
     [Range(-10.0f, 10.0f)]
     private float skeletonOffsetX = 0;
 
@@ -39,7 +42,8 @@ public class HumanBodyTracking : MonoBehaviour
     [SerializeField]
     public AudioClip audioBit2;
 
-
+    [SerializeField]
+    public AudioClip audioBit3;
 
     [SerializeField] private ARHumanBodyManager humanBodyManager;
 
@@ -59,7 +63,8 @@ public class HumanBodyTracking : MonoBehaviour
 
     Vector3 lastLeftToesPosition;
     Vector3 lastRightToesPosition;
-
+    //Instantiated AR
+    List<GameObject> ARObjects = new List<GameObject>();
 
     //new jointTrackers positions
     Vector3 newLeftHandPosition;
@@ -67,6 +72,15 @@ public class HumanBodyTracking : MonoBehaviour
 
     Vector3 newLeftToesPosition;
     Vector3 newRightToesPosition;
+
+    //Colors for tracked joints
+    Color leftHandColor = Color.red;
+    Color rightHandColor = Color.red;
+    Color leftToesColor = Color.red;
+    Color rightToesColor = Color.red;
+
+    //AR States
+    ARState CurrentState = ARState.Pausa;
 
     public ARHumanBodyManager HumanBodyManagers
     {
@@ -78,6 +92,12 @@ public class HumanBodyTracking : MonoBehaviour
     {
         get { return skeletonPrefab; }
         set { skeletonPrefab = value; }
+    }
+
+    public GameObject Esfera
+    {
+        get { return esfera; }
+        set { esfera = value; }
     }
 
     void OnEnable()
@@ -154,8 +174,24 @@ public class HumanBodyTracking : MonoBehaviour
                 jointTrackers = humanBoneController.GetComponentsInChildren<JointTracker>();
                 foreach (JointTracker jointTracker in jointTrackers)
                 {
+                    //Instanciar objetos
+                    if (CurrentState.Equals(ARState.Reanudar))
+                    {
+                        if (jointTracker.gameObject.transform.parent.name.Equals("RightHand"))
+                        {
+                            var nuevaEsfera = Instantiate(Esfera, jointTracker.gameObject.transform.position, Quaternion.identity);
+                            nuevaEsfera.transform.GetComponent<Renderer>().material.color = rightHandColor;
+                            ARObjects.Add(nuevaEsfera);
+                        }
+                        if (jointTracker.gameObject.transform.parent.name.Equals("LeftHand"))
+                        {
+                            var nuevaEsfera = Instantiate(Esfera, jointTracker.gameObject.transform.position, Quaternion.identity);
+                            nuevaEsfera.transform.GetComponent<Renderer>().material.color = leftHandColor;
+                            ARObjects.Add(nuevaEsfera);
+                        }
+                    }
                     //Update new position every (TimeMax - 0.1)
-                    if (TimeCounter > TimeMax-0.1)
+                    if (TimeCounter > TimeMax - 0.1)
                     {
                         if (jointTracker.gameObject.transform.parent.name.Equals("LeftHand"))
                         {
@@ -181,17 +217,33 @@ public class HumanBodyTracking : MonoBehaviour
                         }
                     }
                 }
-                if (poseController.ResumePosition(jointTrackers,audioBit1))
+                if (CurrentState == ARState.Pausa && poseController.ResumePosition(jointTrackers, audioBit1))
+                {
                     positionText.text += $"REANUDAR";
-
-                if (poseController.PausePosition(jointTrackers))
+                    CurrentState = ARState.Reanudar;
+                    SoundController.Instance.PlayMusic(audioBit1, 1f, 1);
+                }
+                if (CurrentState == ARState.Reanudar && poseController.PausePosition(jointTrackers)) {
                     positionText.text += $"PAUSA";
+                    CurrentState = ARState.Pausa;
+                    SoundController.Instance.PlayMusic(audioBit2, 1f, 1);
+                }
 
-                if (poseController.FinishPosition(jointTrackers, audioBit2))
+                if ((CurrentState == ARState.Reanudar || CurrentState == ARState.Pausa) &&
+                    poseController.FinishPosition(jointTrackers, audioBit2))
+                {
                     positionText.text += $"FINALIZAR";
+                    CurrentState = ARState.Finalizar;
 
-                if (poseController.RestartPosition(jointTrackers))
-                    positionText.text += $"REINICIAR";                                
+                    SoundController.Instance.PlayMusic(audioBit3, 1f, 1);
+                }
+                if (CurrentState == ARState.Finalizar && poseController.RestartPosition(jointTrackers))
+                {
+                    positionText.text += $"REINICIAR";
+                    CurrentState = ARState.Reiniciar;
+                    foreach(var obj in ARObjects)
+                        Destroy(obj);
+                }                 
             }
         }
 
@@ -218,7 +270,7 @@ public class HumanBodyTracking : MonoBehaviour
             var speedRigthHand = Math.Round(getJointMovementSpeed(lastRightHandPosition, newRightHandPosition) * 10, 3);
             var speedLeftToes = Math.Round(getJointMovementSpeed(lastLeftToesPosition, newLeftToesPosition) * 10, 3);
             var speedRightToes = Math.Round(getJointMovementSpeed(lastRightToesPosition, newRightToesPosition) * 10, 3);
-
+            
             SpeedLeft.text = string.Empty;
             SpeedLeft.text += $"Velocidad Mano Izquierda : {speedLeftHand}\n";
 
@@ -228,12 +280,14 @@ public class HumanBodyTracking : MonoBehaviour
             SpeedRigth.text += $"Velocidad Mano Derecha : {speedRigthHand}\n";
 
             SpeedRigth.text += $"Velocidad Pie Derecho : {speedRightToes}\n";
-
+            
 
             if (trailRendersTracked != null)
                 foreach (var cube in trailRendersTracked)
                 {
                     double speed = 0;
+                    Color newColor = Color.red;
+
                     switch (cube.transform.parent.name)
                     {
                         case "LeftHand": speed = speedLeftHand;break;
@@ -241,25 +295,41 @@ public class HumanBodyTracking : MonoBehaviour
                         case "LeftToesEnd": speed = speedLeftToes; break;
                         case "RightToesEnd": speed = speedRightToes; break;
                     }
-                    if(0< speed && speed <= 5)
+                    
+                    //var instanciado = nuevaEsfera.transform.GetComponent<Renderer>();
+                    
+                    if (0< speed && speed <= 5)
                     {
-                        cube.material.color = Color.red;
+                        //cube.material.color = Color.red;
+                        newColor = new Color(Color.red.r, Color.red.g, Color.red.b, 0.2f);
                     }
                     else if (5 < speed && speed <= 10)
                     {
-                        cube.material.color = Color.green;
+                        //cube.material.color = Color.green;
+                        newColor = new Color(Color.green.r, Color.green.g, Color.green.b, 0.2f);
                     }
                     else if (10 < speed && speed <= 15)
                     {
-                        cube.material.color = Color.yellow;
+                        //cube.material.color = Color.yellow;
+                        newColor = new Color(Color.yellow.r, Color.yellow.g, Color.yellow.b, 0.2f);
                     }
                     else if (15 < speed && speed <= 20)
                     {
-                        cube.material.color = Color.blue;
+                        //cube.material.color = Color.blue;
+                        newColor = new Color(Color.blue.r, Color.blue.g, Color.blue.b, 0.2f);
                     }
                     else if (20 < speed)
                     {
-                        cube.material.color = Color.magenta;
+                        //cube.material.color = Color.magenta;
+
+                        newColor = new Color(Color.magenta.r, Color.magenta.g, Color.magenta.b, 0.2f);
+                    }
+                    switch (cube.transform.parent.name)
+                    {
+                        case "LeftHand": leftHandColor = newColor; break;
+                        case "RightHand": rightHandColor = newColor; break;
+                        case "LeftToesEnd": leftToesColor = newColor; break;
+                        case "RightToesEnd": rightToesColor = newColor; break;
                     }
                 }
         }

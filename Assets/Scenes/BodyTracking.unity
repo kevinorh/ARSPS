@@ -1043,7 +1043,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1704459762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1156,13 +1156,15 @@ MonoBehaviour:
   positionText: {fileID: 1011312594}
   skeletonPrefab: {fileID: 4169543146387850907, guid: 981daf6e4ed8f43c29ac5ed0c4cdf8ae,
     type: 3}
+  esfera: {fileID: 2927072629832177446, guid: 12598941697074cba8602bcb3e395fdb, type: 3}
   skeletonOffsetX: 0
   skeletonOffsetY: 0
   skeletonOffsetZ: 0
   SpeedRigth: {fileID: 2125829288}
   SpeedLeft: {fileID: 1059019439}
-  audioBit1: {fileID: 8300000, guid: eec5d08f722234d51afd8fa848ac28ee, type: 3}
-  audioBit2: {fileID: 8300000, guid: e046a5657ce42460dadd5c75448e5cf2, type: 3}
+  audioBit1: {fileID: 8300000, guid: 29edf0310fd024c12bf60733bb724681, type: 3}
+  audioBit2: {fileID: 8300000, guid: 24d00c453a0014da9b7eb17088cc92f6, type: 3}
+  audioBit3: {fileID: 8300000, guid: 387b53f503e5641ae85281db9253842d, type: 3}
   humanBodyManager: {fileID: 2004124691}
 --- !u!4 &1900227452
 Transform:
