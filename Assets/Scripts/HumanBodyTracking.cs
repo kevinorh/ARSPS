@@ -13,6 +13,9 @@ public class HumanBodyTracking : MonoBehaviour
     private Text positionText;
 
     [SerializeField]
+    private Text errorText;
+
+    [SerializeField]
     private GameObject skeletonPrefab;
 
     [SerializeField]
@@ -104,6 +107,7 @@ public class HumanBodyTracking : MonoBehaviour
     {
         TimeCounter = 0;
         UnityEngine.Debug.Assert(humanBodyManager != null, "Human body manager is required.");
+        
         humanBodyManager.humanBodiesChanged += OnHumanBodiesChanged;
     }
 
@@ -119,12 +123,14 @@ public class HumanBodyTracking : MonoBehaviour
         positionText.text = string.Empty;
 
         HumanBoneController humanBoneController;
-
-        foreach (var humanBody in eventArgs.added)
+        
+            foreach (var humanBody in eventArgs.added)
         {
             if (!skeletonTracker.TryGetValue(humanBody.trackableId, out humanBoneController))
             {
                 UnityEngine.Debug.Log($"Adding a new skeleton [{humanBody.trackableId}].");
+                errorText.text = string.Empty;
+
                 var newSkeletonGO = Instantiate(skeletonPrefab, humanBody.transform);
 
                 if (jointTrackers == null)
@@ -163,7 +169,7 @@ public class HumanBodyTracking : MonoBehaviour
             humanBoneController.ApplyBodyPose(humanBody, Vector3.zero);
         }
 
-        foreach (var humanBody in eventArgs.updated)
+            foreach (var humanBody in eventArgs.updated)
         {
             if (skeletonTracker.TryGetValue(humanBody.trackableId, out humanBoneController))
             {
@@ -247,23 +253,25 @@ public class HumanBodyTracking : MonoBehaviour
             }
         }
 
-        foreach (var humanBody in eventArgs.removed)
-        {
-            UnityEngine.Debug.Log($"Removing a skeleton [{humanBody.trackableId}].");
-            if (skeletonTracker.TryGetValue(humanBody.trackableId, out humanBoneController))
+            foreach (var humanBody in eventArgs.removed)
             {
-                Destroy(humanBoneController.gameObject);
-                skeletonTracker.Remove(humanBody.trackableId);
+
+                errorText.text = "No fue posible capturar los movimientos";
+                UnityEngine.Debug.Log($"Removing a skeleton [{humanBody.trackableId}].");
+                if (skeletonTracker.TryGetValue(humanBody.trackableId, out humanBoneController))
+                {
+                    Destroy(humanBoneController.gameObject);
+                    skeletonTracker.Remove(humanBody.trackableId);
+                }
             }
-        }
 
-        //To get time execution
-        DateTime end = DateTime.Now;
-        TimeSpan ts = (end - start);
-        TimeCounter += ts.TotalSeconds*100;
+            //To get time execution
+            DateTime end = DateTime.Now;
+            TimeSpan ts = (end - start);
+            TimeCounter += ts.TotalSeconds*100;
 
-        //Calculate speed every TimeMax
-        if (TimeCounter > TimeMax)
+            //Calculate speed every TimeMax
+            if (TimeCounter > TimeMax)
         {
             TimeCounter = 0;
             var speedLeftHand = Math.Round(getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition) * 10, 3);
@@ -295,35 +303,49 @@ public class HumanBodyTracking : MonoBehaviour
                         case "LeftToesEnd": speed = speedLeftToes; break;
                         case "RightToesEnd": speed = speedRightToes; break;
                     }
-                    
-                    //var instanciado = nuevaEsfera.transform.GetComponent<Renderer>();
-                    
-                    if (0< speed && speed <= 5)
+
+                    float Cred, Cgreen, Cblue;
+
+                    if (0 < speed && speed <= 5)
                     {
-                        //cube.material.color = Color.red;
-                        newColor = new Color(Color.red.r, Color.red.g, Color.red.b, 0.2f);
+                        Cred = (float)(10 * speed);
+                        Cgreen = (float)(17 * speed);
+                        Cblue = (float)(255 - (10 * speed));
                     }
                     else if (5 < speed && speed <= 10)
                     {
-                        //cube.material.color = Color.green;
-                        newColor = new Color(Color.green.r, Color.green.g, Color.green.b, 0.2f);
+                        Cred = (float)(10 * speed);
+                        Cgreen = (float)(17 * speed);
+                        Cblue = (float)(255 - (10 * speed));
                     }
                     else if (10 < speed && speed <= 15)
                     {
-                        //cube.material.color = Color.yellow;
-                        newColor = new Color(Color.yellow.r, Color.yellow.g, Color.yellow.b, 0.2f);
+                        Cred = (float)(10 * speed);
+                        Cgreen = (float)(17 * speed);
+                        Cblue = (float)(255 - (10 * speed));
                     }
                     else if (15 < speed && speed <= 20)
                     {
-                        //cube.material.color = Color.blue;
-                        newColor = new Color(Color.blue.r, Color.blue.g, Color.blue.b, 0.2f);
+                        Cred = (float)(10 * speed);
+                        Cgreen = (float)(510 - (20 * speed));
+                        Cblue = (float)(255 - (10 * speed));
                     }
-                    else if (20 < speed)
+                    else if (25 < speed && speed <= 25.5)
                     {
-                        //cube.material.color = Color.magenta;
-
-                        newColor = new Color(Color.magenta.r, Color.magenta.g, Color.magenta.b, 0.2f);
+                        Cred = (float)(10 * speed);
+                        Cgreen = (float)(510 - (20 * speed));
+                        Cblue = (float)(255 - (10 * speed));
                     }
+                    else
+                    {
+                        Cred = 255;
+                        Cgreen = 0;
+                        Cblue = 0;
+                    }
+                    var a =Color.red.r;
+                    errorText.text = Cred/255f + " , " + Cgreen/255f + " , " + Cblue/255f;
+                    newColor = new Color(Cred/255f, Cgreen/255f, Cblue/255f, 0.5f);
+
                     switch (cube.transform.parent.name)
                     {
                         case "LeftHand": leftHandColor = newColor; break;

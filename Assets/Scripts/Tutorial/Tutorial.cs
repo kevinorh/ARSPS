@@ -13,6 +13,8 @@ public class Tutorial : MonoBehaviour
     private GameObject finishButton;
     [SerializeField]
     private GameObject deleteButton;
+    [SerializeField]
+    private GameObject coloresButton;
 
     void OnEnable()
     {
@@ -25,11 +27,13 @@ public class Tutorial : MonoBehaviour
         pauseButton = GameObject.Find("PauseButton");
         finishButton = GameObject.Find("FinishButton");
         deleteButton = GameObject.Find("DeleteButton");
+        coloresButton = GameObject.Find("ColoresButton");
 
         resumeButton.SetActive(true);
         pauseButton.SetActive(false);
         finishButton.SetActive(false);
         deleteButton.SetActive(false);
+        coloresButton.SetActive(false);
 
     }
 
@@ -50,6 +54,11 @@ public class Tutorial : MonoBehaviour
     {
         finishButton.SetActive(false);
         deleteButton.SetActive(true);
+    }
+    public void ShowColoresButton()
+    {
+        deleteButton.SetActive(false);
+        coloresButton.SetActive(true);
     }
     public void StartBodyTracking()
     {
