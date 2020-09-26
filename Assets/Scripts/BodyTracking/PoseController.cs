@@ -34,17 +34,17 @@ public class PoseController : MonoBehaviour
     {
         double angulo = 0;
 
-        Vector3 referenciaHombroTorso = new Vector3(hombro.x, codo.y, hombro.z);
+        Vector3 referenciaHombroCodo = new Vector3(codo.x, hombro.y, codo.z);
 
         float distanciaHombroCodo = Vector3.Distance(hombro, codo);
-        float distanciaHombroReferencia = Vector3.Distance(referenciaHombroTorso, codo);
-        angulo = (180/Mathf.PI) * Mathf.Asin(distanciaHombroReferencia / distanciaHombroCodo);
+        float distanciaCodoReferencia = Vector3.Distance(referenciaHombroCodo, codo);
+        angulo = (180/Mathf.PI) * Mathf.Asin(distanciaCodoReferencia / distanciaHombroCodo);
 
-        if (hombro.y < codo.y && hombro.x < codo.x)
-            angulo = 180 - angulo;
+        if (hombro.y > codo.y && hombro.x < codo.x)
+            angulo = 90 - angulo;
 
-        else if (hombro.y < codo.y && hombro.x > codo.x)
-            angulo = 180 + angulo;
+        else if (hombro.y < codo.y && hombro.x < codo.x)
+            angulo = 90 + angulo;
 
         return angulo;
     }
@@ -53,17 +53,17 @@ public class PoseController : MonoBehaviour
     {
         double angulo = 0;
 
-        Vector3 referenciaHombroTorso = new Vector3(hombro.x, codo.y, hombro.z);
+        Vector3 referenciaHombroCodo = new Vector3(codo.x, hombro.y, codo.z);
 
         float distanciaHombroCodo = Vector3.Distance(hombro, codo);
-        float distanciaHombroReferencia = Vector3.Distance(referenciaHombroTorso, codo);
-        angulo = (180 / Mathf.PI) * Mathf.Asin(distanciaHombroReferencia / distanciaHombroCodo);
+        float distanciaCodoReferencia = Vector3.Distance(referenciaHombroCodo, codo);
+        angulo = (180 / Mathf.PI) * Mathf.Asin(distanciaCodoReferencia / distanciaHombroCodo);
 
-        if (hombro.y < codo.y && hombro.x > codo.x)
-            angulo = 180 - angulo;
+        if (hombro.y > codo.y && hombro.x > codo.x)
+            angulo = 90 - angulo;
 
-        else if (hombro.y < codo.y && hombro.x < codo.x)
-            angulo = 180 + angulo;
+        else if (hombro.y < codo.y && hombro.x > codo.x)
+            angulo = 90 + angulo;
 
         return angulo;
     }

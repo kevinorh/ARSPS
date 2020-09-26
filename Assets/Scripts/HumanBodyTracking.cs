@@ -79,10 +79,10 @@ public class HumanBodyTracking : MonoBehaviour
     Vector3 newLeftToesPosition;
     Vector3 newRightToesPosition;
 
-    Vector3 codoDerecho;
-    Vector3 codoIzquierdo;
-    Vector3 hombroDerecho;
-    Vector3 hombroIzquierdo;
+    Vector3 rightForearm;
+    Vector3 leftForearm;
+    Vector3 rightShoulder1;
+    Vector3 leftShoulder1;
 
 
     //Colors for tracked joints
@@ -132,7 +132,7 @@ public class HumanBodyTracking : MonoBehaviour
             //To get time of execution
             DateTime start = DateTime.Now;
 
-            if (positionDetected && positionDetectionTime.AddSeconds(5) < DateTime.Now)
+            if (positionDetected && positionDetectionTime.AddSeconds(2) < DateTime.Now)
             {
                 positionText.text = string.Empty;
                 positionDetected = false;
@@ -155,20 +155,23 @@ public class HumanBodyTracking : MonoBehaviour
 
                         lastLeftHandPosition = new Vector3(0, 0, 0);
                         lastRightHandPosition = new Vector3(0, 0, 0);
+                        /*
                         lastLeftToesPosition = new Vector3(0, 0, 0);
                         lastRightToesPosition = new Vector3(0, 0, 0);
-
+                        */
                         newLeftHandPosition = new Vector3(0, 0, 0);
                         newRightHandPosition = new Vector3(0, 0, 0);
+                        /*
                         newLeftToesPosition = new Vector3(0, 0, 0);
                         newRightToesPosition = new Vector3(0, 0, 0);
-
-                        codoDerecho = new Vector3(0, 0, 0);
-                        hombroDerecho = new Vector3(0, 0, 0);
-                        codoIzquierdo = new Vector3(0, 0, 0);
-                        hombroIzquierdo = new Vector3(0, 0, 0);
+                        */
+                        rightForearm = new Vector3(0, 0, 0);
+                        rightShoulder1 = new Vector3(0, 0, 0);
+                        leftForearm = new Vector3(0, 0, 0);
+                        leftShoulder1 = new Vector3(0, 0, 0);
 
                     }
+                    /*
                     if (trailRendersTracked == null)
                     {
                         trailRendersTracked = newSkeletonGO.GetComponentsInChildren<TrailRenderer>();
@@ -176,7 +179,7 @@ public class HumanBodyTracking : MonoBehaviour
                         foreach (var item in trailRendersTracked)
                             UnityEngine.Debug.Log($"Adding cubes tracked [{item.transform.parent.name}].");
                     }
-
+                    */
                     humanBoneController = newSkeletonGO.GetComponent<HumanBoneController>();
 
                     // add an offset just when the human body is added
@@ -199,10 +202,8 @@ public class HumanBodyTracking : MonoBehaviour
                 if (jointTrackers != null)
                 {
                     jointTrackers = humanBoneController.GetComponentsInChildren<JointTracker>();
-                    SpeedRigth.text = string.Empty;
                     foreach (JointTracker jointTracker in jointTrackers)
                     {
-                        SpeedRigth.text += jointTracker.gameObject.transform.parent.name + " - ";
                         //Instanciar objetos
                         if (CurrentState.Equals(ARState.Reanudar))
                         {
@@ -233,6 +234,7 @@ public class HumanBodyTracking : MonoBehaviour
                                 lastRightHandPosition = newRightHandPosition;
                                 newRightHandPosition = jointTracker.gameObject.transform.position;
                             }
+                            /*
                             if (jointTracker.gameObject.transform.parent.name.Equals("LeftToesEnd"))
                             {
                                 lastLeftToesPosition = newLeftToesPosition;
@@ -244,39 +246,45 @@ public class HumanBodyTracking : MonoBehaviour
                                 lastRightToesPosition = newRightToesPosition;
                                 newRightToesPosition = jointTracker.gameObject.transform.position;
                             }
+                            */
                             if (jointTracker.gameObject.transform.parent.name.Equals("RightForearm"))
-                                codoDerecho = jointTracker.gameObject.transform.position;
+                                rightForearm = jointTracker.gameObject.transform.position;
 
                             if (jointTracker.gameObject.transform.parent.name.Equals("LeftForearm"))
-                                codoIzquierdo = jointTracker.gameObject.transform.position;
+                                leftForearm = jointTracker.gameObject.transform.position;
 
                             if (jointTracker.gameObject.transform.parent.name.Equals("RightShoulder1"))
-                                hombroDerecho = jointTracker.gameObject.transform.position;
+                                rightShoulder1 = jointTracker.gameObject.transform.position;
 
                             if (jointTracker.gameObject.transform.parent.name.Equals("LeftShoulder1"))
-                                hombroIzquierdo = jointTracker.gameObject.transform.position;
+                                leftShoulder1 = jointTracker.gameObject.transform.position;
 
-                            poseController.ActualizarCoordenadas(hombroDerecho, codoDerecho, newRightHandPosition, hombroIzquierdo, codoIzquierdo, newLeftHandPosition);
+                            poseController.ActualizarCoordenadas(rightShoulder1, rightForearm, newRightHandPosition, leftShoulder1, leftForearm, newLeftHandPosition);
 
+
+                            SpeedRigth.text = string.Empty;
+                            SpeedRigth.text += $"Hombro Derecho : ({rightShoulder1.x},{rightShoulder1.y},{rightShoulder1.z})\n";
+                            SpeedRigth.text += $"Codo Derecho : ({rightForearm.x},{rightForearm.y},{rightForearm.z})\n";
+                            SpeedRigth.text += $"Mano Derecho : ({newRightHandPosition.x},{newRightHandPosition.y},{newRightHandPosition.z})\n";
 
                             SpeedLeft.text = string.Empty;
-                            SpeedLeft.text += $"Codo Derecho : {codoDerecho}\n";
-                            SpeedLeft.text += $"Hombro Derecho : {hombroDerecho}\n";
-                            SpeedLeft.text += $"Mano Derecho : {newRightHandPosition}\n";
+                            SpeedLeft.text += $"Hombro Izquierdo : ({leftShoulder1.x},{leftShoulder1.y},{leftShoulder1.z})\n";
+                            SpeedLeft.text += $"Codo Izquierdo : ({leftForearm.x},{leftForearm.y},{leftForearm.z})\n";
+                            SpeedLeft.text += $"Mano Izquierdo : ({newLeftHandPosition.x},{newLeftHandPosition.y},{newLeftHandPosition.z})\n";
 
-                            var hombroCodoD = poseController.CalcularAnguloHombroCodoDerecha(hombroDerecho, codoDerecho);
-                            var hombroCodoI = poseController.CalcularAnguloHombroCodoIzquierda(hombroIzquierdo, codoIzquierdo);
+                            var hombroCodoD = poseController.CalcularAnguloHombroCodoDerecha(rightShoulder1, rightForearm);
+                            var hombroCodoI = poseController.CalcularAnguloHombroCodoIzquierda(leftShoulder1, leftForearm);
 
-                            var codoManoI = poseController.CalcularAnguloCodoManoIzquierda(codoIzquierdo, newLeftHandPosition, hombroCodoI);
-                            var codoManoD = poseController.CalcularAnguloCodoManoDerecha(codoDerecho, newRightHandPosition, hombroCodoD);
+                            var codoManoI = poseController.CalcularAnguloCodoManoIzquierda(leftForearm, newLeftHandPosition, hombroCodoI);
+                            var codoManoD = poseController.CalcularAnguloCodoManoDerecha(rightForearm, newRightHandPosition, hombroCodoD);
 
                             errorText.text = string.Empty;
 
-                            errorText.text += $"Angulo hombro-codo D : {hombroCodoD.ToString()}\n";
-                            errorText.text += $"Angulo hombro-codo I : {hombroCodoI.ToString()}\n";
-
-                            errorText.text += $"Angulo codo-mano D : {codoManoD.ToString()}\n";
-                            errorText.text += $"Angulo codo-mano I : {codoManoI.ToString()}\n";
+                            errorText.text += $"Angulo hombro-codo D : {hombroCodoD}\n";
+                            errorText.text += $"Angulo codo-mano D : {codoManoD}\n";
+                            errorText.text += $"\n";
+                            errorText.text += $"Angulo hombro-codo I : {hombroCodoI}\n";
+                            errorText.text += $"Angulo codo-mano I : {codoManoI}\n";
                         }
                     }
                     if (!positionDetected)
@@ -348,8 +356,10 @@ public class HumanBodyTracking : MonoBehaviour
                 TimeCounter = 0;
                 var speedLeftHand = Math.Round(getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition) * 10, 3);
                 var speedRigthHand = Math.Round(getJointMovementSpeed(lastRightHandPosition, newRightHandPosition) * 10, 3);
+                /*
                 var speedLeftToes = Math.Round(getJointMovementSpeed(lastLeftToesPosition, newLeftToesPosition) * 10, 3);
                 var speedRightToes = Math.Round(getJointMovementSpeed(lastRightToesPosition, newRightToesPosition) * 10, 3);
+                */
                 /*
                 SpeedLeft.text = string.Empty;
                 SpeedLeft.text += $"Velocidad Mano Izquierda : {speedLeftHand}\n";
@@ -362,9 +372,9 @@ public class HumanBodyTracking : MonoBehaviour
                 SpeedRigth.text += $"Velocidad Pie Derecho : {speedRightToes}\n";
                 */
 
-                if (trailRendersTracked != null)
+                if (jointTrackers != null)
                 {
-                    foreach (var cube in trailRendersTracked)
+                    foreach (var cube in jointTrackers)
                     {
                         double speed = 0;
                         Color newColor = Color.red;
@@ -373,8 +383,10 @@ public class HumanBodyTracking : MonoBehaviour
                         {
                             case "LeftHand": speed = speedLeftHand; break;
                             case "RightHand": speed = speedRigthHand; break;
+                                /*
                             case "LeftToesEnd": speed = speedLeftToes; break;
                             case "RightToesEnd": speed = speedRightToes; break;
+                                */
                         }
 
                         float Cred, Cgreen, Cblue;
@@ -403,8 +415,10 @@ public class HumanBodyTracking : MonoBehaviour
                         {
                             case "LeftHand": leftHandColor = newColor; break;
                             case "RightHand": rightHandColor = newColor; break;
+                                /*
                             case "LeftToesEnd": leftToesColor = newColor; break;
                             case "RightToesEnd": rightToesColor = newColor; break;
+                                */
                         }
                     }
                 }
