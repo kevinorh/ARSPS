@@ -1045,6 +1045,82 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1114040580}
   m_CullTransparentMesh: 0
+--- !u!1 &1119774438
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1119774440}
+  - component: {fileID: 1119774439}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1119774439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119774438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41fcc4076a6204205a6a4cb27fe7b381, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: Sonido1
+    clip: {fileID: 8300000, guid: 1157fd2bfc342410cbfbc300501b47ee, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido2
+    clip: {fileID: 8300000, guid: 6d7905ae7423e425cb31a09d18c3928b, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido3
+    clip: {fileID: 8300000, guid: 6f36e55962c46463fa2cd0022e8e091d, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido4
+    clip: {fileID: 8300000, guid: e6ac3dd3a29de4a7ba50271e5336736c, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido5
+    clip: {fileID: 8300000, guid: 2bc08b674a39b49dca35e49e9da4ea4f, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido6
+    clip: {fileID: 8300000, guid: f626354d863d94570b18a90f5ebbe242, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido7
+    clip: {fileID: 8300000, guid: dd8cee608223e4f0f8da0a4be6a4265e, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido8
+    clip: {fileID: 8300000, guid: 12fba31c3e59a4b54b0a926d388893a6, type: 3}
+    volume: 0.5
+    pitch: 1
+--- !u!4 &1119774440
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119774438}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 320, y: 240, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1524187662
 GameObject:
   m_ObjectHideFlags: 0
@@ -1122,7 +1198,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1704459762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1236,15 +1312,60 @@ MonoBehaviour:
   errorText: {fileID: 40919616}
   skeletonPrefab: {fileID: 4169543146387850907, guid: 981daf6e4ed8f43c29ac5ed0c4cdf8ae,
     type: 3}
-  esfera: {fileID: 2927072629832177446, guid: 12598941697074cba8602bcb3e395fdb, type: 3}
   skeletonOffsetX: 0
   skeletonOffsetY: 0
   skeletonOffsetZ: 0
   SpeedRigth: {fileID: 2125829288}
   SpeedLeft: {fileID: 1059019439}
+  objeto1: {fileID: 2927072629832177446, guid: 12598941697074cba8602bcb3e395fdb, type: 3}
+  objeto2: {fileID: 3333524935696141340, guid: 781f833f511944395bdea95adae1411d, type: 3}
+  objeto3: {fileID: 8920221390207438068, guid: 8a336c0fbdda341629289fe4d98e4bfc, type: 3}
+  objeto4: {fileID: 5863370650397075650, guid: f54982e387e0242f4bcdaa0f5e2ff347, type: 3}
+  objeto5: {fileID: 8828869875592953739, guid: d7843815021224605bd61dcaebc67d22, type: 3}
+  objeto6: {fileID: 3846174656993918448, guid: 2695a146af1474bfebe94439004ee7ec, type: 3}
+  objeto7: {fileID: 998710787781666108, guid: f27017d317d1a41018e19942508ec079, type: 3}
+  objeto8: {fileID: 5366996448527151510, guid: 9a15acb4e5d96480ea3e395479093be0, type: 3}
+  sounds:
+  - name: Sonido1
+    clip: {fileID: 8300000, guid: e046a5657ce42460dadd5c75448e5cf2, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido2
+    clip: {fileID: 8300000, guid: 387b53f503e5641ae85281db9253842d, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido3
+    clip: {fileID: 8300000, guid: 29edf0310fd024c12bf60733bb724681, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido4
+    clip: {fileID: 8300000, guid: eec5d08f722234d51afd8fa848ac28ee, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido5
+    clip: {fileID: 8300000, guid: 24d00c453a0014da9b7eb17088cc92f6, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido6
+    clip: {fileID: 8300000, guid: e046a5657ce42460dadd5c75448e5cf2, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido7
+    clip: {fileID: 8300000, guid: 387b53f503e5641ae85281db9253842d, type: 3}
+    volume: 0.5
+    pitch: 1
+  - name: Sonido8
+    clip: {fileID: 8300000, guid: 29edf0310fd024c12bf60733bb724681, type: 3}
+    volume: 0.5
+    pitch: 1
   audioBit1: {fileID: 8300000, guid: 29edf0310fd024c12bf60733bb724681, type: 3}
   audioBit2: {fileID: 8300000, guid: 24d00c453a0014da9b7eb17088cc92f6, type: 3}
   audioBit3: {fileID: 8300000, guid: 387b53f503e5641ae85281db9253842d, type: 3}
+  audioBit4: {fileID: 8300000, guid: 24d00c453a0014da9b7eb17088cc92f6, type: 3}
+  audioBit5: {fileID: 8300000, guid: eec5d08f722234d51afd8fa848ac28ee, type: 3}
+  audioBit6: {fileID: 8300000, guid: 29edf0310fd024c12bf60733bb724681, type: 3}
+  audioBit7: {fileID: 8300000, guid: e046a5657ce42460dadd5c75448e5cf2, type: 3}
+  audioBit8: {fileID: 8300000, guid: 387b53f503e5641ae85281db9253842d, type: 3}
   humanBodyManager: {fileID: 2004124691}
 --- !u!4 &1900227452
 Transform:

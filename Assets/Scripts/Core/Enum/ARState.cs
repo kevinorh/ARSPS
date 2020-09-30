@@ -4,8 +4,6 @@ using UnityEngine;
 
 public enum ARState
 {
-    Pausa = 0,  // 0
-    Reanudar = 1,  // 1
-    Reiniciar = 2,  // 2
-    Finalizar = 3,  // 3
+    Detener = 0,  // 0
+    Continuar = 1
 }

@@ -8,7 +8,6 @@ using UnityEngine.XR.ARSubsystems;
 
 public class HumanBodyTracking : MonoBehaviour
 {
-
     [SerializeField]
     private Text positionText;
 
@@ -17,9 +16,6 @@ public class HumanBodyTracking : MonoBehaviour
 
     [SerializeField]
     private GameObject skeletonPrefab;
-
-    [SerializeField]
-    private GameObject esfera;
 
     [SerializeField]
     [Range(-10.0f, 10.0f)]
@@ -40,20 +36,47 @@ public class HumanBodyTracking : MonoBehaviour
     private Text SpeedLeft;
 
     [SerializeField]
-    public AudioClip audioBit1;
+    private GameObject objeto1;
+    [SerializeField]
+    private GameObject objeto2;
+    [SerializeField]
+    private GameObject objeto3;
+    [SerializeField]
+    private GameObject objeto4;
+    [SerializeField]
+    private GameObject objeto5;
+    [SerializeField]
+    private GameObject objeto6;
+    [SerializeField]
+    private GameObject objeto7;
+    [SerializeField]
+    private GameObject objeto8;
 
+    [SerializeField]
+    Sound[] sounds;
+
+    [SerializeField]
+    public AudioClip audioBit1;
     [SerializeField]
     public AudioClip audioBit2;
-
     [SerializeField]
     public AudioClip audioBit3;
+    [SerializeField]
+    public AudioClip audioBit4;
+    [SerializeField]
+    public AudioClip audioBit5;
+    [SerializeField]
+    public AudioClip audioBit6;
+    [SerializeField]
+    public AudioClip audioBit7;
+    [SerializeField]
+    public AudioClip audioBit8;
 
     [SerializeField] private ARHumanBodyManager humanBodyManager;
 
     private Dictionary<TrackableId, HumanBoneController> skeletonTracker = new Dictionary<TrackableId, HumanBoneController>();
 
     private JointTracker[] jointTrackers;
-    private TrailRenderer[] trailRendersTracked;
 
     private PoseController poseController = new PoseController();
 
@@ -66,18 +89,12 @@ public class HumanBodyTracking : MonoBehaviour
     //last jointTrackers positions
     Vector3 lastLeftHandPosition;
     Vector3 lastRightHandPosition;
-
-    Vector3 lastLeftToesPosition;
-    Vector3 lastRightToesPosition;
     //Instantiated AR
     List<GameObject> ARObjects = new List<GameObject>();
 
     //new jointTrackers positions
     Vector3 newLeftHandPosition;
     Vector3 newRightHandPosition;
-
-    Vector3 newLeftToesPosition;
-    Vector3 newRightToesPosition;
 
     Vector3 rightForearm;
     Vector3 leftForearm;
@@ -88,11 +105,17 @@ public class HumanBodyTracking : MonoBehaviour
     //Colors for tracked joints
     Color leftHandColor = Color.red;
     Color rightHandColor = Color.red;
-    Color leftToesColor = Color.red;
-    Color rightToesColor = Color.red;
 
     //AR States
-    ARState CurrentState = ARState.Pausa;
+    ARState figuresGeneration = ARState.Detener;
+    //Posiciones
+    Posicion currentPosition = Posicion.Ninguna;
+
+    List<AudioSource> audioSources = new List<AudioSource>();
+
+
+    private SoundManager soundManager;
+    string currentSound;
 
     public ARHumanBodyManager HumanBodyManagers
     {
@@ -106,14 +129,18 @@ public class HumanBodyTracking : MonoBehaviour
         set { skeletonPrefab = value; }
     }
 
-    public GameObject Esfera
+    public GameObject ARObjetToBeCreated
     {
-        get { return esfera; }
-        set { esfera = value; }
+        get { return objeto1; }
+        set { objeto1 = value; }
     }
 
     void OnEnable()
     {
+        soundManager = SoundManager.instace;
+        if (soundManager == null)
+            Debug.LogError("SoundManager not found in the scene");
+
         TimeCounter = 0;
         UnityEngine.Debug.Assert(humanBodyManager != null, "Human body manager is required.");
         positionDetectionTime = DateTime.Now;
@@ -125,6 +152,7 @@ public class HumanBodyTracking : MonoBehaviour
         if (humanBodyManager != null)
             humanBodyManager.humanBodiesChanged -= OnHumanBodiesChanged;
     }
+    
     void OnHumanBodiesChanged(ARHumanBodiesChangedEventArgs eventArgs)
     {
         try
@@ -132,7 +160,7 @@ public class HumanBodyTracking : MonoBehaviour
             //To get time of execution
             DateTime start = DateTime.Now;
 
-            if (positionDetected && positionDetectionTime.AddSeconds(2) < DateTime.Now)
+            if (positionDetected && positionDetectionTime.AddSeconds(1) < DateTime.Now)
             {
                 positionText.text = string.Empty;
                 positionDetected = false;
@@ -141,7 +169,7 @@ public class HumanBodyTracking : MonoBehaviour
             HumanBoneController humanBoneController;
 
             foreach (var humanBody in eventArgs.added)
-            {
+            {                
                 if (!skeletonTracker.TryGetValue(humanBody.trackableId, out humanBoneController))
                 {
                     UnityEngine.Debug.Log($"Adding a new skeleton [{humanBody.trackableId}].");
@@ -155,31 +183,14 @@ public class HumanBodyTracking : MonoBehaviour
 
                         lastLeftHandPosition = new Vector3(0, 0, 0);
                         lastRightHandPosition = new Vector3(0, 0, 0);
-                        /*
-                        lastLeftToesPosition = new Vector3(0, 0, 0);
-                        lastRightToesPosition = new Vector3(0, 0, 0);
-                        */
                         newLeftHandPosition = new Vector3(0, 0, 0);
                         newRightHandPosition = new Vector3(0, 0, 0);
-                        /*
-                        newLeftToesPosition = new Vector3(0, 0, 0);
-                        newRightToesPosition = new Vector3(0, 0, 0);
-                        */
                         rightForearm = new Vector3(0, 0, 0);
                         rightShoulder1 = new Vector3(0, 0, 0);
                         leftForearm = new Vector3(0, 0, 0);
                         leftShoulder1 = new Vector3(0, 0, 0);
 
                     }
-                    /*
-                    if (trailRendersTracked == null)
-                    {
-                        trailRendersTracked = newSkeletonGO.GetComponentsInChildren<TrailRenderer>();
-                        UnityEngine.Debug.Log($"Adding cubes tracked [{trailRendersTracked.Count()}].");
-                        foreach (var item in trailRendersTracked)
-                            UnityEngine.Debug.Log($"Adding cubes tracked [{item.transform.parent.name}].");
-                    }
-                    */
                     humanBoneController = newSkeletonGO.GetComponent<HumanBoneController>();
 
                     // add an offset just when the human body is added
@@ -205,17 +216,18 @@ public class HumanBodyTracking : MonoBehaviour
                     foreach (JointTracker jointTracker in jointTrackers)
                     {
                         //Instanciar objetos
-                        if (CurrentState.Equals(ARState.Reanudar))
+                        //if (CurrentState.Equals(ARState.Reanudar))
+                        if(figuresGeneration.Equals(ARState.Continuar))
                         {
                             if (jointTracker.gameObject.transform.parent.name.Equals("RightHand"))
                             {
-                                var nuevaEsfera = Instantiate(Esfera, jointTracker.gameObject.transform.position, Quaternion.identity);
+                                var nuevaEsfera = Instantiate(ARObjetToBeCreated, jointTracker.gameObject.transform.position, Quaternion.identity);
                                 nuevaEsfera.transform.GetComponent<Renderer>().material.color = rightHandColor;
                                 ARObjects.Add(nuevaEsfera);
                             }
                             if (jointTracker.gameObject.transform.parent.name.Equals("LeftHand"))
                             {
-                                var nuevaEsfera = Instantiate(Esfera, jointTracker.gameObject.transform.position, Quaternion.identity);
+                                var nuevaEsfera = Instantiate(ARObjetToBeCreated, jointTracker.gameObject.transform.position, Quaternion.identity);
                                 nuevaEsfera.transform.GetComponent<Renderer>().material.color = leftHandColor;
                                 ARObjects.Add(nuevaEsfera);
                             }
@@ -234,19 +246,6 @@ public class HumanBodyTracking : MonoBehaviour
                                 lastRightHandPosition = newRightHandPosition;
                                 newRightHandPosition = jointTracker.gameObject.transform.position;
                             }
-                            /*
-                            if (jointTracker.gameObject.transform.parent.name.Equals("LeftToesEnd"))
-                            {
-                                lastLeftToesPosition = newLeftToesPosition;
-                                newLeftToesPosition = jointTracker.gameObject.transform.position;
-                            }
-
-                            if (jointTracker.gameObject.transform.parent.name.Equals("RightToesEnd"))
-                            {
-                                lastRightToesPosition = newRightToesPosition;
-                                newRightToesPosition = jointTracker.gameObject.transform.position;
-                            }
-                            */
                             if (jointTracker.gameObject.transform.parent.name.Equals("RightForearm"))
                                 rightForearm = jointTracker.gameObject.transform.position;
 
@@ -259,76 +258,204 @@ public class HumanBodyTracking : MonoBehaviour
                             if (jointTracker.gameObject.transform.parent.name.Equals("LeftShoulder1"))
                                 leftShoulder1 = jointTracker.gameObject.transform.position;
 
-                            poseController.ActualizarCoordenadas(rightShoulder1, rightForearm, newRightHandPosition, leftShoulder1, leftForearm, newLeftHandPosition);
+                            //poseController.ActualizarCoordenadas(rightShoulder1, rightForearm, newRightHandPosition, leftShoulder1, leftForearm, newLeftHandPosition);
 
 
                             SpeedRigth.text = string.Empty;
                             SpeedRigth.text += $"Hombro Derecho : ({rightShoulder1.x},{rightShoulder1.y},{rightShoulder1.z})\n";
                             SpeedRigth.text += $"Codo Derecho : ({rightForearm.x},{rightForearm.y},{rightForearm.z})\n";
                             SpeedRigth.text += $"Mano Derecho : ({newRightHandPosition.x},{newRightHandPosition.y},{newRightHandPosition.z})\n";
+                            SpeedRigth.text += $"RF 1 : ({rightForearm.x},{rightShoulder1.y},{rightForearm.z})\n";
+                            SpeedRigth.text += $"RF 2 : ({rightForearm.x},{newRightHandPosition.y},{rightForearm.z})\n";
 
                             SpeedLeft.text = string.Empty;
                             SpeedLeft.text += $"Hombro Izquierdo : ({leftShoulder1.x},{leftShoulder1.y},{leftShoulder1.z})\n";
                             SpeedLeft.text += $"Codo Izquierdo : ({leftForearm.x},{leftForearm.y},{leftForearm.z})\n";
                             SpeedLeft.text += $"Mano Izquierdo : ({newLeftHandPosition.x},{newLeftHandPosition.y},{newLeftHandPosition.z})\n";
+                            SpeedLeft.text += $"RF 1 : ({leftForearm.x},{leftShoulder1.y},{leftForearm.z})\n";
+                            SpeedLeft.text += $"RF 2 : ({leftForearm.x},{newLeftHandPosition.y},{leftForearm.z})\n";
 
-                            var hombroCodoD = poseController.CalcularAnguloHombroCodoDerecha(rightShoulder1, rightForearm);
-                            var hombroCodoI = poseController.CalcularAnguloHombroCodoIzquierda(leftShoulder1, leftForearm);
-
-                            var codoManoI = poseController.CalcularAnguloCodoManoIzquierda(leftForearm, newLeftHandPosition, hombroCodoI);
-                            var codoManoD = poseController.CalcularAnguloCodoManoDerecha(rightForearm, newRightHandPosition, hombroCodoD);
 
                             errorText.text = string.Empty;
-
+                            /*
+                            double hombroCodoD = poseController.CalcularAnguloHombroCodoDerecha(rightShoulder1, rightForearm);
                             errorText.text += $"Angulo hombro-codo D : {hombroCodoD}\n";
-                            errorText.text += $"Angulo codo-mano D : {codoManoD}\n";
-                            errorText.text += $"\n";
+                            double codoManoD = poseController.CalcularAnguloCodoManoDerecha(rightForearm, newRightHandPosition, hombroCodoD);
+                            errorText.text += $"Angulo codo-mano D : {codoManoD}\n\n";
+
+                            double hombroCodoI = poseController.CalcularAnguloHombroCodoIzquierda(leftShoulder1, leftForearm);
                             errorText.text += $"Angulo hombro-codo I : {hombroCodoI}\n";
+                            double codoManoI = poseController.CalcularAnguloCodoManoIzquierda(leftForearm, newLeftHandPosition, hombroCodoI);
                             errorText.text += $"Angulo codo-mano I : {codoManoI}\n";
+                            */
+                            currentPosition = poseController.IdentificarPosicion(rightShoulder1, rightForearm, newRightHandPosition, leftShoulder1, leftForearm, newLeftHandPosition);                            
                         }
                     }
                     if (!positionDetected)
                     {
-                        if (CurrentState == ARState.Pausa && poseController.ResumePosition(jointTrackers, audioBit1))
+                        if (!currentPosition.Equals(Posicion.Ninguna))
+                            positionText.text = $"{currentPosition}";
+
+                        if (currentPosition == Posicion.Sonido1 &&
+                            currentSound != currentPosition.ToString())
                         {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido1}");
                             positionDetectionTime = DateTime.Now;
                             positionDetected = true;
 
-                            positionText.text += $"REANUDAR";
-                            CurrentState = ARState.Reanudar;
-                            SoundController.Instance.PlayMusic(audioBit1, 0.5f, 1);
-                        }
-                        if (CurrentState == ARState.Reanudar && poseController.PausePosition(jointTrackers))
-                        {
-                            positionDetectionTime = DateTime.Now;
-                            positionDetected = true;
+                            ARObjetToBeCreated = objeto1;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
 
-                            positionText.text += $"PAUSA";
-                            CurrentState = ARState.Pausa;
-                            SoundController.Instance.PlayMusic(audioBit2, 0.5f, 1);
+                            soundManager.PlaySound(Posicion.Sonido1.ToString());
                         }
 
-                        if ((CurrentState == ARState.Reanudar || CurrentState == ARState.Pausa) &&
-                            poseController.FinishPosition(jointTrackers, audioBit2))
+                        else if (currentPosition == Posicion.Sonido2 &&
+                            currentSound != currentPosition.ToString())
                         {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido2}");
                             positionDetectionTime = DateTime.Now;
                             positionDetected = true;
 
-                            positionText.text += $"FINALIZAR";
-                            CurrentState = ARState.Finalizar;
-
-                            SoundController.Instance.PlayMusic(audioBit3, 0.5f, 1);
+                            ARObjetToBeCreated = objeto2;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
+                            soundManager.PlaySound(Posicion.Sonido2.ToString());
                         }
-                        if (CurrentState == ARState.Finalizar && poseController.RestartPosition(jointTrackers))
+
+                        else if (currentPosition == Posicion.Sonido3 &&
+                            currentSound != currentPosition.ToString())
+                        {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido3}");
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            ARObjetToBeCreated = objeto3;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
+                            soundManager.PlaySound(Posicion.Sonido3.ToString());
+
+                        }
+
+                        else if (currentPosition == Posicion.Sonido4 &&
+                            currentSound != currentPosition.ToString())
+                        {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido4}");
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            ARObjetToBeCreated = objeto4;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
+                            soundManager.PlaySound(Posicion.Sonido4.ToString());
+                        }
+
+                        else if (currentPosition == Posicion.Sonido5 &&
+                            currentSound != currentPosition.ToString())
+                        {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido5}");
+
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            ARObjetToBeCreated = objeto5;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
+                            soundManager.PlaySound(Posicion.Sonido5.ToString());
+                        }
+
+                        else if (currentPosition == Posicion.Sonido6 &&
+                            currentSound != currentPosition.ToString())
+                        {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido6}");
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            ARObjetToBeCreated = objeto6;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
+
+                            soundManager.PlaySound(Posicion.Sonido6.ToString());
+                        }
+
+                        else if (currentPosition == Posicion.Sonido7 &&
+                            currentSound != currentPosition.ToString())
+                        {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido7}");
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            ARObjetToBeCreated = objeto7;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
+                            soundManager.PlaySound(Posicion.Sonido7.ToString());
+                        }
+
+                        else if (currentPosition == Posicion.Sonido8 &&
+                            currentSound != currentPosition.ToString())
+                        {
+                            UnityEngine.Debug.Log($"Posicion Identificada {Posicion.Sonido8}");
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            ARObjetToBeCreated = objeto8;
+                            figuresGeneration = ARState.Continuar;
+                            currentSound = currentPosition.ToString();
+                            soundManager.PlaySound(Posicion.Sonido8.ToString());
+                        }
+
+                        else if (currentPosition == Posicion.SubirVolumen)
                         {
                             positionDetectionTime = DateTime.Now;
                             positionDetected = true;
 
-                            positionText.text += $"REINICIAR";
-                            CurrentState = ARState.Reiniciar;
+                            soundManager.IncreaseVolume(currentSound);
+                        }
+
+                        else if (currentPosition == Posicion.BajarVolumen)
+                        {
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            soundManager.DecreaseVolume(currentSound);
+                        }
+
+                        else if (currentPosition == Posicion.Acelerar)
+                        {
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            soundManager.IncreasePitch(currentSound);
+                        }
+
+                        else if (currentPosition == Posicion.Ralentizar)
+                        {
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+                            soundManager.DecreasePitch(currentSound);
+                        }
+
+                        else if (currentPosition == Posicion.Finalizar)
+                        {
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+                            figuresGeneration = ARState.Detener;
+                        }
+
+                        else if (currentPosition == Posicion.Reiniciar)
+                        {
+                            positionDetectionTime = DateTime.Now;
+                            positionDetected = true;
+
+                            figuresGeneration = ARState.Detener;
+
                             foreach (var obj in ARObjects)
                                 Destroy(obj);
+
+                            soundManager.StopSounds();
                         }
+
+                        UnityEngine.Debug.Log($"CurrentSound: {currentSound}");
                     }
                 }
             }
@@ -356,21 +483,6 @@ public class HumanBodyTracking : MonoBehaviour
                 TimeCounter = 0;
                 var speedLeftHand = Math.Round(getJointMovementSpeed(lastLeftHandPosition, newLeftHandPosition) * 10, 3);
                 var speedRigthHand = Math.Round(getJointMovementSpeed(lastRightHandPosition, newRightHandPosition) * 10, 3);
-                /*
-                var speedLeftToes = Math.Round(getJointMovementSpeed(lastLeftToesPosition, newLeftToesPosition) * 10, 3);
-                var speedRightToes = Math.Round(getJointMovementSpeed(lastRightToesPosition, newRightToesPosition) * 10, 3);
-                */
-                /*
-                SpeedLeft.text = string.Empty;
-                SpeedLeft.text += $"Velocidad Mano Izquierda : {speedLeftHand}\n";
-
-                SpeedLeft.text += $"Velocidad Pie Izquierdo : {speedLeftToes}\n";
-
-                SpeedRigth.text = string.Empty;
-                SpeedRigth.text += $"Velocidad Mano Derecha : {speedRigthHand}\n";
-
-                SpeedRigth.text += $"Velocidad Pie Derecho : {speedRightToes}\n";
-                */
 
                 if (jointTrackers != null)
                 {
@@ -383,10 +495,6 @@ public class HumanBodyTracking : MonoBehaviour
                         {
                             case "LeftHand": speed = speedLeftHand; break;
                             case "RightHand": speed = speedRigthHand; break;
-                                /*
-                            case "LeftToesEnd": speed = speedLeftToes; break;
-                            case "RightToesEnd": speed = speedRightToes; break;
-                                */
                         }
 
                         float Cred, Cgreen, Cblue;
@@ -415,10 +523,6 @@ public class HumanBodyTracking : MonoBehaviour
                         {
                             case "LeftHand": leftHandColor = newColor; break;
                             case "RightHand": rightHandColor = newColor; break;
-                                /*
-                            case "LeftToesEnd": leftToesColor = newColor; break;
-                            case "RightToesEnd": rightToesColor = newColor; break;
-                                */
                         }
                     }
                 }
