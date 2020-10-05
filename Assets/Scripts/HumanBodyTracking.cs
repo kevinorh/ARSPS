@@ -55,22 +55,6 @@ public class HumanBodyTracking : MonoBehaviour
     [SerializeField]
     Sound[] sounds;
 
-    [SerializeField]
-    public AudioClip audioBit1;
-    [SerializeField]
-    public AudioClip audioBit2;
-    [SerializeField]
-    public AudioClip audioBit3;
-    [SerializeField]
-    public AudioClip audioBit4;
-    [SerializeField]
-    public AudioClip audioBit5;
-    [SerializeField]
-    public AudioClip audioBit6;
-    [SerializeField]
-    public AudioClip audioBit7;
-    [SerializeField]
-    public AudioClip audioBit8;
 
     [SerializeField] private ARHumanBodyManager humanBodyManager;
 
@@ -85,6 +69,7 @@ public class HumanBodyTracking : MonoBehaviour
 
     DateTime positionDetectionTime;
     bool positionDetected = false;
+
 
     //last jointTrackers positions
     Vector3 lastLeftHandPosition;
@@ -111,8 +96,9 @@ public class HumanBodyTracking : MonoBehaviour
     //Posiciones
     Posicion currentPosition = Posicion.Ninguna;
 
-    List<AudioSource> audioSources = new List<AudioSource>();
+    int maxObjectsInScreen = 3000;
 
+    int eliminados = 0;
 
     private SoundManager soundManager;
     string currentSound;
@@ -159,17 +145,19 @@ public class HumanBodyTracking : MonoBehaviour
         {
             //To get time of execution
             DateTime start = DateTime.Now;
-
+            //Keep position detected message for 1 sec
             if (positionDetected && positionDetectionTime.AddSeconds(1) < DateTime.Now)
             {
                 positionText.text = string.Empty;
                 positionDetected = false;
             }
+            if (positionDetected && !currentPosition.Equals(Posicion.Ninguna))
+                positionText.text = $"{currentPosition}";
 
             HumanBoneController humanBoneController;
-
+            //Add detected joints
             foreach (var humanBody in eventArgs.added)
-            {                
+            {          
                 if (!skeletonTracker.TryGetValue(humanBody.trackableId, out humanBoneController))
                 {
                     UnityEngine.Debug.Log($"Adding a new skeleton [{humanBody.trackableId}].");
@@ -203,7 +191,7 @@ public class HumanBodyTracking : MonoBehaviour
                 humanBoneController.InitializeSkeletonJoints();
                 humanBoneController.ApplyBodyPose(humanBody, Vector3.zero);
             }
-
+            //update detected joints position
             foreach (var humanBody in eventArgs.updated)
             {
                 if (skeletonTracker.TryGetValue(humanBody.trackableId, out humanBoneController))
@@ -213,10 +201,10 @@ public class HumanBodyTracking : MonoBehaviour
                 if (jointTrackers != null)
                 {
                     jointTrackers = humanBoneController.GetComponentsInChildren<JointTracker>();
+
                     foreach (JointTracker jointTracker in jointTrackers)
                     {
-                        //Instanciar objetos
-                        //if (CurrentState.Equals(ARState.Reanudar))
+                        //Instance ARObjects for RightHand
                         if(figuresGeneration.Equals(ARState.Continuar))
                         {
                             if (jointTracker.gameObject.transform.parent.name.Equals("RightHand"))
@@ -224,13 +212,33 @@ public class HumanBodyTracking : MonoBehaviour
                                 var nuevaEsfera = Instantiate(ARObjetToBeCreated, jointTracker.gameObject.transform.position, Quaternion.identity);
                                 nuevaEsfera.transform.GetComponent<Renderer>().material.color = rightHandColor;
                                 ARObjects.Add(nuevaEsfera);
+
+                                UnityEngine.Debug.Log($"#ARObjects: [{ARObjects.Count()}].");
+                                UnityEngine.Debug.Log($"#eliminados: [{eliminados}].");
+                                //Destroy first ARObjects to keep maxObjectsInScreen
+                                if (ARObjects.Count() - eliminados >= maxObjectsInScreen)
+                                {
+                                    UnityEngine.Debug.Log($"CUMPLE CONDICIÓN.");
+                                    DestroyARObject(eliminados);
+                                }
                             }
+                            //Instance ARObjects for LeftHand
                             if (jointTracker.gameObject.transform.parent.name.Equals("LeftHand"))
                             {
                                 var nuevaEsfera = Instantiate(ARObjetToBeCreated, jointTracker.gameObject.transform.position, Quaternion.identity);
                                 nuevaEsfera.transform.GetComponent<Renderer>().material.color = leftHandColor;
                                 ARObjects.Add(nuevaEsfera);
+
+                                UnityEngine.Debug.Log($"#ARObjects: [{ARObjects.Count()}].");
+                                UnityEngine.Debug.Log($"#eliminados: [{eliminados}].");
+                                //Destroy first ARObjects to keep maxObjectsInScreen
+                                if (ARObjects.Count() - eliminados >= maxObjectsInScreen)
+                                {
+                                    UnityEngine.Debug.Log($"CUMPLE CONDICIÓN.");
+                                    DestroyARObject(eliminados);
+                                }
                             }
+                            UnityEngine.Debug.Log($"ARObjects [{ARObjects.Count()}].");
                         }
                         //Update new position every (TimeMax - 0.1)
                         if (TimeCounter > TimeMax - 0.1)
@@ -257,45 +265,44 @@ public class HumanBodyTracking : MonoBehaviour
 
                             if (jointTracker.gameObject.transform.parent.name.Equals("LeftShoulder1"))
                                 leftShoulder1 = jointTracker.gameObject.transform.position;
+                           /*
+                           SpeedRigth.text = string.Empty;
+                           SpeedRigth.text += $"Hombro Derecho : ({rightShoulder1.x},{rightShoulder1.y},{rightShoulder1.z})\n";
+                           SpeedRigth.text += $"Codo Derecho : ({rightForearm.x},{rightForearm.y},{rightForearm.z})\n";
+                           SpeedRigth.text += $"Mano Derecho : ({newRightHandPosition.x},{newRightHandPosition.y},{newRightHandPosition.z})\n";
+                           SpeedRigth.text += $"RF 1 : ({rightForearm.x},{rightShoulder1.y},{rightForearm.z})\n";
+                           SpeedRigth.text += $"RF 2 : ({rightForearm.x},{newRightHandPosition.y},{rightForearm.z})\n";
 
-                            //poseController.ActualizarCoordenadas(rightShoulder1, rightForearm, newRightHandPosition, leftShoulder1, leftForearm, newLeftHandPosition);
-
-
-                            SpeedRigth.text = string.Empty;
-                            SpeedRigth.text += $"Hombro Derecho : ({rightShoulder1.x},{rightShoulder1.y},{rightShoulder1.z})\n";
-                            SpeedRigth.text += $"Codo Derecho : ({rightForearm.x},{rightForearm.y},{rightForearm.z})\n";
-                            SpeedRigth.text += $"Mano Derecho : ({newRightHandPosition.x},{newRightHandPosition.y},{newRightHandPosition.z})\n";
-                            SpeedRigth.text += $"RF 1 : ({rightForearm.x},{rightShoulder1.y},{rightForearm.z})\n";
-                            SpeedRigth.text += $"RF 2 : ({rightForearm.x},{newRightHandPosition.y},{rightForearm.z})\n";
-
-                            SpeedLeft.text = string.Empty;
-                            SpeedLeft.text += $"Hombro Izquierdo : ({leftShoulder1.x},{leftShoulder1.y},{leftShoulder1.z})\n";
-                            SpeedLeft.text += $"Codo Izquierdo : ({leftForearm.x},{leftForearm.y},{leftForearm.z})\n";
-                            SpeedLeft.text += $"Mano Izquierdo : ({newLeftHandPosition.x},{newLeftHandPosition.y},{newLeftHandPosition.z})\n";
-                            SpeedLeft.text += $"RF 1 : ({leftForearm.x},{leftShoulder1.y},{leftForearm.z})\n";
-                            SpeedLeft.text += $"RF 2 : ({leftForearm.x},{newLeftHandPosition.y},{leftForearm.z})\n";
+                           SpeedLeft.text = string.Empty;
+                           SpeedLeft.text += $"Hombro Izquierdo : ({leftShoulder1.x},{leftShoulder1.y},{leftShoulder1.z})\n";
+                           SpeedLeft.text += $"Codo Izquierdo : ({leftForearm.x},{leftForearm.y},{leftForearm.z})\n";
+                           SpeedLeft.text += $"Mano Izquierdo : ({newLeftHandPosition.x},{newLeftHandPosition.y},{newLeftHandPosition.z})\n";
+                           SpeedLeft.text += $"RF 1 : ({leftForearm.x},{leftShoulder1.y},{leftForearm.z})\n";
+                           SpeedLeft.text += $"RF 2 : ({leftForearm.x},{newLeftHandPosition.y},{leftForearm.z})\n";
 
 
-                            errorText.text = string.Empty;
-                            /*
-                            double hombroCodoD = poseController.CalcularAnguloHombroCodoDerecha(rightShoulder1, rightForearm);
-                            errorText.text += $"Angulo hombro-codo D : {hombroCodoD}\n";
-                            double codoManoD = poseController.CalcularAnguloCodoManoDerecha(rightForearm, newRightHandPosition, hombroCodoD);
-                            errorText.text += $"Angulo codo-mano D : {codoManoD}\n\n";
+                           errorText.text = string.Empty;
 
-                            double hombroCodoI = poseController.CalcularAnguloHombroCodoIzquierda(leftShoulder1, leftForearm);
-                            errorText.text += $"Angulo hombro-codo I : {hombroCodoI}\n";
-                            double codoManoI = poseController.CalcularAnguloCodoManoIzquierda(leftForearm, newLeftHandPosition, hombroCodoI);
-                            errorText.text += $"Angulo codo-mano I : {codoManoI}\n";
-                            */
+                           double hombroCodoD = poseController.CalcularAnguloHombroCodoDerecha(rightShoulder1, rightForearm);
+                           errorText.text += $"Angulo hombro-codo D : {hombroCodoD}\n";
+                           double codoManoD = poseController.CalcularAnguloCodoManoDerecha(rightForearm, newRightHandPosition, hombroCodoD);
+                           errorText.text += $"Angulo codo-mano D : {codoManoD}\n\n";
+
+                           double hombroCodoI = poseController.CalcularAnguloHombroCodoIzquierda(leftShoulder1, leftForearm);
+                           errorText.text += $"Angulo hombro-codo I : {hombroCodoI}\n";
+                           double codoManoI = poseController.CalcularAnguloCodoManoIzquierda(leftForearm, newLeftHandPosition, hombroCodoI);
+                           errorText.text += $"Angulo codo-mano I : {codoManoI}\n";
+                           */
                             currentPosition = poseController.IdentificarPosicion(rightShoulder1, rightForearm, newRightHandPosition, leftShoulder1, leftForearm, newLeftHandPosition);                            
                         }
                     }
+                    //Cannot detect new position after 1 sec if a position different to Ninguna has been detected
                     if (!positionDetected)
                     {
+                        /*
                         if (!currentPosition.Equals(Posicion.Ninguna))
                             positionText.text = $"{currentPosition}";
-
+                        */
                         if (currentPosition == Posicion.Sonido1 &&
                             currentSound != currentPosition.ToString())
                         {
@@ -458,8 +465,9 @@ public class HumanBodyTracking : MonoBehaviour
                         UnityEngine.Debug.Log($"CurrentSound: {currentSound}");
                     }
                 }
-            }
 
+            }
+            //Remove joints not detected
             foreach (var humanBody in eventArgs.removed)
             {
 
@@ -486,6 +494,7 @@ public class HumanBodyTracking : MonoBehaviour
 
                 if (jointTrackers != null)
                 {
+                    //Define color for left and right hand AR Figures
                     foreach (var cube in jointTrackers)
                     {
                         double speed = 0;
@@ -518,6 +527,7 @@ public class HumanBodyTracking : MonoBehaviour
                             Cblue = 0;
                         }
                         newColor = new Color(Cred / 255f, Cgreen / 255f, Cblue / 255f, 0.5f);
+                        
 
                         switch (cube.transform.parent.name)
                         {
@@ -530,14 +540,13 @@ public class HumanBodyTracking : MonoBehaviour
         }
         catch (Exception e)
         {
-            UnityEngine.Debug.Log($"Error al capturar los movimientos: [{e}].");
+            UnityEngine.Debug.LogError($"Error al capturar los movimientos: [{e}].");
             errorText.text = "No fue posible capturar los movimientos";
         }
     }
 
     double getJointMovementSpeed(Vector3 lastPosition, Vector3 newPostion)
     {
-
         var v3distance = Vector3.Distance(lastPosition, newPostion);
 
         var lastx = (float)Math.Round(lastPosition.x * 10, 2);
@@ -550,6 +559,19 @@ public class HumanBodyTracking : MonoBehaviour
         double distance = Math.Sqrt(Math.Pow(newx - lastx, 2) + Math.Pow(newy - lasty, 2) + Math.Pow(newz - lastz, 2));
         //errorText.text = $"v3Distance: {v3distance} - calcDistance: {distance}";
 
+        UnityEngine.Debug.Log($"Distancia tipo1: [{distance}].");
+        UnityEngine.Debug.Log($"Distancia tipo1: [{v3distance}].");
+
         return distance / TimeMax;
     }
+    void DestroyARObject(int indexToBeDestroyed) {
+        UnityEngine.Debug.Log($"To Be Destroyed {indexToBeDestroyed}");
+        if (ARObjects[indexToBeDestroyed] != null)
+        {
+            UnityEngine.Debug.Log($"Destroy ARObjects[{indexToBeDestroyed}]");
+            Destroy(ARObjects[indexToBeDestroyed]);
+            eliminados++;
+        }
+    }
+
 }
