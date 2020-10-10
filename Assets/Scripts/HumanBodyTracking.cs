@@ -280,7 +280,8 @@ public class HumanBodyTracking : MonoBehaviour
                            SpeedLeft.text += $"RF 1 : ({leftForearm.x},{leftShoulder1.y},{leftForearm.z})\n";
                            SpeedLeft.text += $"RF 2 : ({leftForearm.x},{newLeftHandPosition.y},{leftForearm.z})\n";
 
-
+                            */
+                           /*
                            errorText.text = string.Empty;
 
                            double hombroCodoD = poseController.CalcularAnguloHombroCodoDerecha(rightShoulder1, rightForearm);

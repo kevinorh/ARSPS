@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class HumanBodyTrackerUI : Singleton<HumanBodyTrackerUI>
-{
+{/*
     [SerializeField]
     [Tooltip("The Human Body Tracker text used for debugging purposes.")]
     public Text humanBodyTrackerText;
@@ -16,16 +16,16 @@ public class HumanBodyTrackerUI : Singleton<HumanBodyTrackerUI>
     [SerializeField]
     [Tooltip("The Human bone controller used for debugging purposes.")]
     public Text humanBoneControllerText;
+    
+        [SerializeField]
+        private GameObject welcomePanel;
 
-    [SerializeField]
-    private GameObject welcomePanel;
+        [SerializeField]
+        private Button dismissButton;
 
-    [SerializeField]
-    private Button dismissButton;
-
-    [SerializeField]
-    private Button toggleOptionsButton;
-
+        [SerializeField]
+        private Button toggleOptionsButton;
+    
     [SerializeField]
     private GameObject options;
 
@@ -75,4 +75,5 @@ public class HumanBodyTrackerUI : Singleton<HumanBodyTrackerUI>
             options.SetActive(true);
         }
     }
+    */
 }

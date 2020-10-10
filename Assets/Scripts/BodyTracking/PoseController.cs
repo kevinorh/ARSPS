@@ -130,10 +130,10 @@ public class PoseController : MonoBehaviour
         anguloI2 = CalcularAnguloCodoManoIzquierda(codoI, manoI, anguloI1);
 
 
-        if (95 <= anguloD1 && anguloD1 <= 115 &&
-            60 <= anguloD2 && anguloD2 <= 80 &&
-            95 <= anguloI1 && anguloI1 <= 115 &&
-            130 <= anguloI2 && anguloI2 <= 150)
+        if (95 <= anguloD1 && anguloD1 <= 130 &&
+            60 <= anguloD2 && anguloD2 <= 110 &&
+            95 <= anguloI1 && anguloI1 <= 130 &&
+            80 <= anguloI2 && anguloI2 <= 150)
             return Posicion.Sonido1;
 
         else if (60 <= anguloD1 && anguloD1 <= 80 &&
@@ -142,63 +142,63 @@ public class PoseController : MonoBehaviour
             200 <= anguloI2 && anguloI2 <= 220)
             return Posicion.Sonido2;
 
-        else if (100 <= anguloD1 && anguloD1 <= 130 &&
+        else if (100 <= anguloD1 && anguloD1 <= 150 &&
             100 <= anguloD2 && anguloD2 <= 150 &&
-            50 <= anguloI1 && anguloI1 <= 80 &&
-            200 <= anguloI2 && anguloI2 <= 260)
+            30 <= anguloI1 && anguloI1 <= 80 &&
+            180 <= anguloI2 && anguloI2 <= 260)
             return Posicion.Sonido3;
 
-        else if (50 <= anguloD1 && anguloD1 <= 70 &&
+        else if (30 <= anguloD1 && anguloD1 <= 80 &&
             260 <= anguloD2 && anguloD2 <= 290 &&
-            110 <= anguloI1 && anguloI1 <= 130 &&
-            100 <= anguloI2 && anguloI2 <= 160)
+            100 <= anguloI1 && anguloI1 <= 150 &&
+            100 <= anguloI2 && anguloI2 <= 150)
             return Posicion.Sonido4;
 
-        else if (85 <= anguloD1 && anguloD1 <= 105 &&
-            170 <= anguloD2 && anguloD2 <= 190 &&
+        else if (80 <= anguloD1 && anguloD1 <= 110 &&
+            160 <= anguloD2 && anguloD2 <= 190 &&
             40 <= anguloI1 && anguloI1 <= 60 &&
             -20 <= anguloI2 && anguloI2 <= -5)
             return Posicion.Sonido5;
 
-        else if (40 <= anguloD1 && anguloD1 <= 70 &&
+        else if (40 <= anguloD1 && anguloD1 <= 60 &&
             -20 <= anguloD2 && anguloD2 <= -5 &&
-            85 <= anguloI1 && anguloI1 <= 105 &&
-            170 <= anguloI2 && anguloI2 <= 190)
+            80 <= anguloI1 && anguloI1 <= 110 &&
+            160 <= anguloI2 && anguloI2 <= 190)
             return Posicion.Sonido6;
 
         else if (80 <= anguloD1 && anguloD1 <= 100 &&
-            170 <= anguloD2 && anguloD2 <= 190 &&
+            160 <= anguloD2 && anguloD2 <= 190 &&
             40 <= anguloI1 && anguloI1 <= 65 &&
-            250 <= anguloI2 && anguloI2 <= 290)
+            250 <= anguloI2 && anguloI2 <= 300)
             return Posicion.Sonido7;
 
         else if (40 <= anguloD1 && anguloD1 <= 65 &&
-            250 <= anguloD2 && anguloD2 <= 290 &&
+            250 <= anguloD2 && anguloD2 <= 300 &&
             80 <= anguloI1 && anguloI1 <= 100 &&
-            170 <= anguloI2 && anguloI2 <= 190)
+            160 <= anguloI2 && anguloI2 <= 190)
             return Posicion.Sonido8;
 
         else if (80 <= anguloD1 && anguloD1 <= 110 &&
             20 <= anguloD2 && anguloD2 <= 150 &&
             80 <= anguloI1 && anguloI1 <= 100 &&
-            170 <= anguloI2 && anguloI2 <= 190)
+            160 <= anguloI2 && anguloI2 <= 190)
             return Posicion.SubirVolumen;
 
-        else if (80 <= anguloD1 && anguloD1 <= 110 &&
+        else if (60 <= anguloD1 && anguloD1 <= 110 &&
             210 <= anguloD2 && anguloD2 <= 300 &&
             80 <= anguloI1 && anguloI1 <= 110 &&
-            170 <= anguloI2 && anguloI2 <= 190)
+            160 <= anguloI2 && anguloI2 <= 190)
             return Posicion.BajarVolumen;
 
         else if (80 <= anguloD1 && anguloD1 <= 110 &&
-            170 <= anguloD2 && anguloD2 <= 190 &&
+            160 <= anguloD2 && anguloD2 <= 190 &&
             80 <= anguloI1 && anguloI1 <= 100 &&
             20 <= anguloI2 && anguloI2 <= 150)
             return Posicion.Acelerar;
 
         else if (80 <= anguloD1 && anguloD1 <= 110 &&
             170 <= anguloD2 && anguloD2 <= 190 &&
-            80 <= anguloI1 && anguloI1 <= 110 &&
+            60 <= anguloI1 && anguloI1 <= 110 &&
             210 <= anguloI2 && anguloI2 <= 300)
             return Posicion.Ralentizar;
 
@@ -208,10 +208,10 @@ public class PoseController : MonoBehaviour
             -25 <= anguloI2 && anguloI2 <= 25)
             return Posicion.Finalizar;
 
-        else if (120 <= anguloD1 && anguloD1 <= 150 &&
-            80 <= anguloD2 && anguloD2 <= 110 &&
-            120 <= anguloI1 && anguloI1 <= 150 &&
-            80 <= anguloI2 && anguloI2 <= 110)
+        else if (130 < anguloD1 && anguloD1 <= 160 &&
+            90 < anguloD2 && anguloD2 <= 110 &&
+            130 < anguloI1 && anguloI1 <= 160 &&
+            80 <= anguloI2 && anguloI2 < 120)
             return Posicion.Reiniciar;
 
         else
